@@ -1,0 +1,13 @@
+#!/bin/bash
+
+
+for a in {1..100}
+do
+	cp blueSquare.png blocks/"$a"_block.png
+done
+
+echo; echo
+
+exit 0
+
+
