@@ -23,6 +23,7 @@ struct Event
 {
     int type;
     void *data = nullptr;
+    class Resources *res = nullptr;
     class Component *receiver = nullptr;
     class Component *sender = nullptr;
     class UI *ui = nullptr;
@@ -35,8 +36,8 @@ public:
     virtual void draw(class Resources *res, sf::RenderWindow& window, bool focused) = 0;
     virtual void update();
 
-    virtual void processEvent(Event event);
-    virtual void init() {};
+    virtual void processEvent(class Event *event);
+    virtual void init(class Resources *res) {};
 
     int getID() { return ID; }
     
@@ -74,19 +75,22 @@ class UI
 public:
     void update() {};
     void draw(class Resources *res, sf::RenderWindow& window);
-    void sendEvent(class Event event);
-    class Event& createEvent(class Event& event, int type, void *data, 
+    void sendEvent(class Event *event);
+    class Event& createEvent(class Event& event, int type, void *data, class Resources *res = nullptr, 
                             class Component *receiver = nullptr, class Component *sender = nullptr)
                             {
                                 event.type = type;
                                 event.data = data;
+                                event.res = res;
                                 event.receiver = receiver;
                                 event.sender = sender;
                                 event.ui = this;
                                 return event;
                             };
 
-    void createComponent( int type, sf::Vector2i position, sf::IntRect area, std::string name);
+    void createComponent( int type, sf::Vector2i position, sf::IntRect area, std::string name, class Resources *res);
+    int getFocusedComponent() { return focusedComponent; }
+    void setFocusedComponent(int componentID) { focusedComponent = componentID; }
     
 private: 
     void addComponent(Component *component);
@@ -94,7 +98,7 @@ private:
     std::vector <Component *>   components;
     std::map <int, std::vector <Component *>> drawOrder;
     
-    int focusedComponent = 0;
+    int focusedComponent = -1;
 
     int getNextID() { return nextID++; }
     int nextID = 1;
@@ -108,8 +112,8 @@ public:
     BlockSelectList(); 
     ~BlockSelectList() {}
     void draw(class Resources *res, sf::RenderWindow& window, bool focused);
-    void init();
-    virtual void processEvent(class Event event);
+    void init(class Resources *res);
+    void processEvent(class Event *event);
 
 private:
     
@@ -133,5 +137,17 @@ private:
 
     int textureViewWindowWidth;
     int firstTextureToShow = 1;
+};
+
+
+class EditBox : Component
+{
+public:
+    void draw(class Resources *res, sf::RenderWindow& window, bool focused);
+    void init(class Resources *res);
+    void processEvent(class Event *event);
+
+private:
+    std::string buffer;
 };
 

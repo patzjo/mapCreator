@@ -23,6 +23,8 @@ public:
 
     sf::Texture *getTexture(int id);
     int getNextKeyFromTexture(int id);
+    int getPrevKeyFromTexture(int id);
+
     int getMinTextureKey() { 
         if ( blockTextures.empty() )
             return -1;

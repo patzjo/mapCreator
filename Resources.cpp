@@ -28,6 +28,17 @@ int Resources::getNextKeyFromTexture(int id)
         return -1;
 }
 
+int Resources::getPrevKeyFromTexture(int id)
+{
+    auto it = blockTextures.find(id);
+    auto prevOne = std::prev(it);
+
+    if ( prevOne != blockTextures.end() )
+        return prevOne->first;
+    else
+        return -1;
+}
+
 void Resources::loadBlocks(std::string directory)
 {
      std::cout << "Loading blocks..." << std::endl;

@@ -15,13 +15,13 @@ void UI::draw(class Resources *res, sf::RenderWindow& window)
     }
 }
 
-void UI::sendEvent(Event event)
+void UI::sendEvent(class Event *event)
 {
     for(auto& i : components)
         i->processEvent(event);
 }
 
-void UI::createComponent(int type, sf::Vector2i position, sf::IntRect area, std::string name)
+void UI::createComponent(int type, sf::Vector2i position, sf::IntRect area, std::string name, class Resources *res)
 {
     Component *component = nullptr;
     
@@ -49,7 +49,7 @@ void UI::createComponent(int type, sf::Vector2i position, sf::IntRect area, std:
         component->setName(name);
         component->ID = UI::getNextID();
         component->uiParent = this;
-        component->init();
+        component->init(res);
 
         addComponent(component);
     }
@@ -61,7 +61,7 @@ void UI::addComponent(Component *component)
     drawOrder[component->getLayerPosition()].emplace_back(component);
 }
 
-void Component::processEvent(class Event event)
+void Component::processEvent(class Event *event)
 {
 
 }
@@ -75,7 +75,7 @@ BlockSelectList::BlockSelectList()
 {
 }
 
-void BlockSelectList::init()
+void BlockSelectList::init(class Resources *res)
 {
     
     float arrowControlWidth = (float)getArea().width*0.05f;
@@ -116,6 +116,8 @@ void BlockSelectList::init()
     rightArrowArea.top      = getPosition().y;
     rightArrowArea.width    = arrowControlWidth;
     rightArrowArea.height   = getArea().height;
+
+    firstTextureToShow = res->getMinTextureKey();    
 }
 
 void BlockSelectList::draw(class Resources *res, sf::RenderWindow& window, bool selected)
@@ -146,6 +148,7 @@ void BlockSelectList::draw(class Resources *res, sf::RenderWindow& window, bool 
     box.setOutlineColor(sf::Color::Yellow);
     box.setOutlineThickness(1.0f);
 
+
     int curTexture = firstTextureToShow;
 
     for(unsigned int c = 0; c < textureViewCount; c++ )
@@ -169,35 +172,37 @@ void BlockSelectList::draw(class Resources *res, sf::RenderWindow& window, bool 
 
 }
 
-void BlockSelectList::processEvent(class Event event)
+void BlockSelectList::processEvent(class Event *event)
 {
-    if (event.receiver != nullptr && event.receiver != this)
+    if (event->receiver != nullptr && event->receiver != this)
         return;
 
-    switch(event.type)
+    switch(event->type)
     {
     case RESERVED:
     break;
 
     case MOUSE_CLICK_EVENT:
     {
-        MouseClickEventData *data = (MouseClickEventData *)event.data;
+        MouseClickEventData *data = (MouseClickEventData *)event->data;
         
         if ( !data->pressed && inRect(data->position, getArea()) )
         {
             if ( inRect(data->position, leftArrowArea) )
             {
-                std::cout << "Left Arrow Pressed!" << std::endl;
-                
+                int prevID = event->res->getPrevKeyFromTexture(firstTextureToShow);
+                if ( prevID != -1 )
+                    firstTextureToShow = prevID;
             }
             else if ( inRect(data->position, rightArrowArea) )
             {
-                std::cout << "Right Arrow Pressed!" << std::endl;
-
+                int nextID = event->res->getNextKeyFromTexture(firstTextureToShow);
+                if ( nextID != -1 )
+                    firstTextureToShow = nextID;
             }
             else 
             {
-                std::cout << "" << std::endl;
+                
             }
 
 
@@ -214,3 +219,17 @@ void BlockSelectList::processEvent(class Event event)
     
 }
 
+void EditBox::draw(class Resources *res, sf::RenderWindow& window, bool focused)
+{
+
+}
+
+void EditBox::init(class Resources *res)
+{
+
+}
+
+void EditBox::processEvent(class Event *event)
+{
+    
+}

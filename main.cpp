@@ -13,7 +13,7 @@ const int screenH = 1080;
 const float toolAreaHeight = 0.1f;
 const float toolAreaWidth  = 0.9f;
 
-void init(sf::RectangleShape& viewOutlines, sf::IntRect& viewArea, UI& ui, sf::View& camera)
+void init(sf::RectangleShape& viewOutlines, sf::IntRect& viewArea, UI& ui, sf::View& camera, class Resources *res)
 {
     viewOutlines.setFillColor(sf::Color::Transparent);
     viewOutlines.setOutlineColor(sf::Color::Blue);
@@ -31,7 +31,7 @@ void init(sf::RectangleShape& viewOutlines, sf::IntRect& viewArea, UI& ui, sf::V
     ui.createComponent(BLOCK_SELECT_LIST, {0, (int)(screenH*(1.0f-toolAreaHeight)+4)}, 
                         {0, (int)(screenH*(1.0f-toolAreaHeight)), 
                         (int)(screenW*0.8f), (int)(screenH*toolAreaHeight)-4},
-                        "Tool");
+                        "Tool", res);
 }
 
 int main( int argc, char **argv )
@@ -59,7 +59,7 @@ int main( int argc, char **argv )
     sf::RectangleShape viewOutlines;
     sf::IntRect viewArea;
 
-    init( viewOutlines, viewArea, myUI, camera);
+    init( viewOutlines, viewArea, myUI, camera, &myResources);
 
     while(window.isOpen())
     {
@@ -90,8 +90,8 @@ int main( int argc, char **argv )
                 MouseClickEventData mouseClickEventData({event.mouseButton.x, event.mouseButton.y}, 
                                                         event.mouseButton.button, true);
 
-                myUI.createEvent(myEvent, MOUSE_CLICK_EVENT, (void*)&mouseClickEventData);
-                myUI.sendEvent(myEvent);
+                myUI.createEvent(myEvent, MOUSE_CLICK_EVENT, (void*)&mouseClickEventData, &myResources);
+                myUI.sendEvent(&myEvent);
             }
 
             if ( event.type == sf::Event::MouseButtonReleased )
@@ -100,8 +100,8 @@ int main( int argc, char **argv )
                 MouseClickEventData mouseClickEventData({event.mouseButton.x, event.mouseButton.y}, 
                                                         event.mouseButton.button, false);
 
-                myUI.createEvent(myEvent, MOUSE_CLICK_EVENT, (void*)&mouseClickEventData);
-                myUI.sendEvent(myEvent);
+                myUI.createEvent(myEvent, MOUSE_CLICK_EVENT, (void*)&mouseClickEventData, &myResources);
+                myUI.sendEvent(&myEvent);
             }
 
         }
