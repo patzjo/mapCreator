@@ -32,6 +32,8 @@ void init(sf::RectangleShape& viewOutlines, sf::IntRect& viewArea, UI& ui, sf::V
                         {0, (int)(screenH*(1.0f-toolAreaHeight)), 
                         (int)(screenW*0.8f), (int)(screenH*toolAreaHeight)-4},
                         "Tool", res);
+
+    ui.createComponent(EDIT_BOX, );
 }
 
 int main( int argc, char **argv )
@@ -65,14 +67,14 @@ int main( int argc, char **argv )
     {
         sf::Vector2i mousePos = sf::Mouse::getPosition(window);
         sf::Event event;
+        
         while(window.pollEvent(event))
         {
+            Event myEvent;
             if ( event.type == sf::Event::Closed )
             {
                 window.close();
-            }
-
-            if( event.type == sf::Event::KeyReleased)
+            } else if( event.type == sf::Event::KeyReleased)
             {
                 switch(event.key.code)
                 {
@@ -82,26 +84,25 @@ int main( int argc, char **argv )
 
                     default: break;
                 }
-            }
-
-            if ( event.type == sf::Event::MouseButtonPressed )
+            } else if ( event.type == sf::Event::MouseButtonPressed )
             {
-                Event myEvent;
                 MouseClickEventData mouseClickEventData({event.mouseButton.x, event.mouseButton.y}, 
                                                         event.mouseButton.button, true);
 
                 myUI.createEvent(myEvent, MOUSE_CLICK_EVENT, (void*)&mouseClickEventData, &myResources);
-                myUI.sendEvent(&myEvent);
-            }
-
-            if ( event.type == sf::Event::MouseButtonReleased )
+//                myUI.sendEvent(&myEvent);
+            } else if ( event.type == sf::Event::MouseButtonReleased )
             {
-                Event myEvent;
                 MouseClickEventData mouseClickEventData({event.mouseButton.x, event.mouseButton.y}, 
                                                         event.mouseButton.button, false);
 
                 myUI.createEvent(myEvent, MOUSE_CLICK_EVENT, (void*)&mouseClickEventData, &myResources);
-                myUI.sendEvent(&myEvent);
+//                myUI.sendEvent(&myEvent);
+            } else if (event.type == sf::Event::TextEntered)
+            {
+                
+                myUI.createEvent(myEvent, TEXT_ENTERED_EVENT, (void *)&event.text.unicode);
+//                myUI.sendEvent(&myEvent);
             }
 
         }

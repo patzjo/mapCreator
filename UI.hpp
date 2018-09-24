@@ -3,8 +3,8 @@
 #include <string>
 #include "Map.hpp"
 
-enum ComponentType {SLIDER, BLOCK_SELECT_LIST, TEXT_FIELD};
-enum EventType {RESERVED, MOUSE_CLICK_EVENT};
+enum ComponentType {SLIDER, BLOCK_SELECT_LIST, EDIT_BOX};
+enum EventType {RESERVED, MOUSE_CLICK_EVENT, TEXT_ENTERED_EVENT};
 
 struct MouseClickEventData
 {
@@ -85,6 +85,8 @@ public:
                                 event.receiver = receiver;
                                 event.sender = sender;
                                 event.ui = this;
+
+                                sendEvent(&event);
                                 return event;
                             };
 

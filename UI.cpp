@@ -38,6 +38,13 @@ void UI::createComponent(int type, sf::Vector2i position, sf::IntRect area, std:
 
         } break;
 
+        case EDIT_BOX:
+        {
+            EditBox *editBoxComponent = new EditBox();
+            component = (Component *)editBoxComponent;
+            component->setLayerPosition(1);
+        } break;
+
         default: break;
     }
 
@@ -77,8 +84,8 @@ BlockSelectList::BlockSelectList()
 
 void BlockSelectList::init(class Resources *res)
 {
-    
     float arrowControlWidth = (float)getArea().width*0.05f;
+
     componentBackground.setFillColor(sf::Color::Red);
     componentBackground.setPosition((sf::Vector2f)getPosition());
     componentBackground.setSize({(float)getArea().width, (float)getArea().height});
@@ -231,5 +238,16 @@ void EditBox::init(class Resources *res)
 
 void EditBox::processEvent(class Event *event)
 {
-    
+    if (event->receiver != nullptr && event->receiver != this)
+        return;
+
+    switch(event->type)
+    {
+        case TEXT_ENTERED_EVENT:
+        {
+            
+        } break;
+
+        default: break;
+    }
 }
