@@ -28,12 +28,12 @@ void init(sf::RectangleShape& viewOutlines, sf::IntRect& viewArea, UI& ui, sf::V
 
     camera.setViewport({0,0,1, 1.0f-toolAreaHeight});
 
-    ui.createComponent(BLOCK_SELECT_LIST, {0, (int)(screenH*(1.0f-toolAreaHeight)+4)}, 
-                        {0, (int)(screenH*(1.0f-toolAreaHeight)), 
+    ui.createComponent(BLOCK_SELECT_LIST,
+                        {0, (int)(screenH*(1.0f-toolAreaHeight)+4), 
                         (int)(screenW*0.8f), (int)(screenH*toolAreaHeight)-4},
                         "Tool", res);
 
-    ui.createComponent(EDIT_BOX, );
+    //ui.createComponent(EDIT_BOX, );
 }
 
 int main( int argc, char **argv )
@@ -140,7 +140,7 @@ int main( int argc, char **argv )
                 sf::Vector2f pos = window.mapPixelToCoords(mousePos, camera);
                 int x = pos.x;
                 int y = pos.y;
-                myMap.addBlock(x, y, 0.0f, 1);
+                myMap.addBlock(x, y, 0.0f, myUI.getBlockID());
             }
             release = false;
         }

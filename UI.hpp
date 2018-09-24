@@ -44,13 +44,12 @@ public:
     bool getVisible() { return visible; }
     int getType() { return type; }
 
-    void setPosition(sf::Vector2i position) { this->position = position; }
     void setArea(sf::IntRect area) {this->area = area; }
     void setType(int type) {this->type = type; }
     void setVisible(bool visible) {this->visible = visible; }
     void setName(std::string name) { this->name = name; }
 
-    sf::Vector2i getPosition() { return position; }
+    sf::Vector2i getPosition() { return {area.left, area.top}; }
     sf::IntRect getArea() { return area; }
 
     void setLayerPosition(int position) { layerPosition = position; }
@@ -58,7 +57,6 @@ public:
 
 
 private:
-    sf::Vector2i position;
     sf::IntRect  area;
 
     int layerPosition = 1;
@@ -90,9 +88,11 @@ public:
                                 return event;
                             };
 
-    void createComponent( int type, sf::Vector2i position, sf::IntRect area, std::string name, class Resources *res);
+    void createComponent( int type, sf::IntRect area, std::string name, class Resources *res);
     int getFocusedComponent() { return focusedComponent; }
     void setFocusedComponent(int componentID) { focusedComponent = componentID; }
+    void setBlockID( int ID ) { blockID = ID; }
+    int getBlockID() { return blockID; }
     
 private: 
     void addComponent(Component *component);
@@ -104,7 +104,7 @@ private:
 
     int getNextID() { return nextID++; }
     int nextID = 1;
-
+    int blockID = -1;
 };
 
 class BlockSelectList : Component
@@ -117,8 +117,14 @@ public:
     void init(class Resources *res);
     void processEvent(class Event *event);
 
+    void updateTextures();
+
 private:
-    
+    struct BlockTexture
+    {
+        int ID = 0;
+        sf::Texture *texture = nullptr;
+    }; 
 
     sf::RectangleShape componentBackground;
     sf::RectangleShape arrowBackground;
@@ -139,6 +145,9 @@ private:
 
     int textureViewWindowWidth;
     int firstTextureToShow = 1;
+
+    std::vector <BlockTexture> textures;
+    class Resources *res;
 };
 
 

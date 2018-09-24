@@ -206,6 +206,8 @@ int Map::getGridY(int y)
 
 void Map::addBlock(int blockX, int blockY, float blockAngle, int blockID)
 {
+    if ( blockID == -1 )
+        return;
     Block *blockPointer = new Block;
     
     blockPointer->x = blockX;

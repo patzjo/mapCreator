@@ -21,7 +21,7 @@ void UI::sendEvent(class Event *event)
         i->processEvent(event);
 }
 
-void UI::createComponent(int type, sf::Vector2i position, sf::IntRect area, std::string name, class Resources *res)
+void UI::createComponent(int type, sf::IntRect area, std::string name, class Resources *res)
 {
     Component *component = nullptr;
     
@@ -51,7 +51,6 @@ void UI::createComponent(int type, sf::Vector2i position, sf::IntRect area, std:
     if ( component != nullptr )
     {
         component->setType(type);
-        component->setPosition(position);
         component->setArea(area);
         component->setName(name);
         component->ID = UI::getNextID();
@@ -85,6 +84,7 @@ BlockSelectList::BlockSelectList()
 void BlockSelectList::init(class Resources *res)
 {
     float arrowControlWidth = (float)getArea().width*0.05f;
+    this->res = res;
 
     componentBackground.setFillColor(sf::Color::Red);
     componentBackground.setPosition((sf::Vector2f)getPosition());
@@ -124,7 +124,10 @@ void BlockSelectList::init(class Resources *res)
     rightArrowArea.width    = arrowControlWidth;
     rightArrowArea.height   = getArea().height;
 
-    firstTextureToShow = res->getMinTextureKey();    
+    textures.resize(textureViewCount);
+
+    firstTextureToShow = res->getMinTextureKey();
+    updateTextures();    
 }
 
 void BlockSelectList::draw(class Resources *res, sf::RenderWindow& window, bool selected)
@@ -156,25 +159,20 @@ void BlockSelectList::draw(class Resources *res, sf::RenderWindow& window, bool 
     box.setOutlineThickness(1.0f);
 
 
-    int curTexture = firstTextureToShow;
-
     for(unsigned int c = 0; c < textureViewCount; c++ )
     {
         
-        sf::Texture *texture = res->getTexture(curTexture);
+        sf::Texture *texture = textures[c].texture;
         if(!texture)
             break;
+
         float x = textureViewStartPosition.x + textureViewMargin + (c*textureViewWindowWidth);
         textureSprite.setTexture(*res->getTexture(1));
         textureSprite.setPosition(x, textureViewStartPosition.y+1);
         window.draw(textureSprite);
-        curTexture = res->getNextKeyFromTexture(curTexture);
+
         box.setPosition(x, textureViewStartPosition.y);
         window.draw(box);
-
-
-        if ( curTexture == -1)
-            break;
     }
 
 }
@@ -200,30 +198,53 @@ void BlockSelectList::processEvent(class Event *event)
                 int prevID = event->res->getPrevKeyFromTexture(firstTextureToShow);
                 if ( prevID != -1 )
                     firstTextureToShow = prevID;
+                updateTextures();
             }
             else if ( inRect(data->position, rightArrowArea) )
             {
                 int nextID = event->res->getNextKeyFromTexture(firstTextureToShow);
                 if ( nextID != -1 )
                     firstTextureToShow = nextID;
+                updateTextures();
             }
             else 
             {
-                
-            }
+                int posX = data->position.x - textureViewStartPosition.x;
+                int index = posX / textureViewWindowWidth;
 
-
+                if ( index < textureViewCount )
+                    if ( textures[index].texture )
+                    {
+                        event->ui->setBlockID(textures[index].ID);
+                    }
+                     
+           }
         }
-        
-
-                
-
     } break;
 
     default: break;
     }
 
     
+}
+
+void BlockSelectList::updateTextures()
+{
+    int curTexture = firstTextureToShow;
+    for(unsigned int c = 0; c < textureViewCount; c++ )
+    {
+        sf::Texture *texture = res->getTexture(curTexture);
+        
+        textures[c].ID = curTexture;
+        textures[c].texture = texture;
+
+        if(!texture)
+            break;
+
+        curTexture = res->getNextKeyFromTexture(curTexture);
+        if ( curTexture == -1)
+            break;
+    }
 }
 
 void EditBox::draw(class Resources *res, sf::RenderWindow& window, bool focused)
