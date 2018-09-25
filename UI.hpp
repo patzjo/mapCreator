@@ -36,7 +36,7 @@ public:
     virtual void draw(class Resources *res, sf::RenderWindow& window, bool focused) = 0;
     virtual void update();
 
-    virtual void processEvent(class Event *event);
+    virtual bool processEvent(class Event *event);
     virtual void init(class Resources *res) {};
 
     int getID() { return ID; }
@@ -54,7 +54,7 @@ public:
 
     void setLayerPosition(int position) { layerPosition = position; }
     int  getLayerPosition() { return layerPosition; }
-
+    bool getCanBeSelected() { return canBeSelected; }
 
 private:
     sf::IntRect  area;
@@ -66,6 +66,7 @@ private:
     std::string name;
     bool visible = true;
     class UI *uiParent;
+    bool canBeSelected = false;
 };
 
 class UI
@@ -88,7 +89,7 @@ public:
                                 return event;
                             };
 
-    void createComponent( int type, sf::IntRect area, std::string name, class Resources *res);
+    Component *createComponent( int type, sf::IntRect area, std::string name, class Resources *res, bool canBeSelected = false);
     int getFocusedComponent() { return focusedComponent; }
     void setFocusedComponent(int componentID) { focusedComponent = componentID; }
     void setBlockID( int ID ) { blockID = ID; }
@@ -115,7 +116,7 @@ public:
     ~BlockSelectList() {}
     void draw(class Resources *res, sf::RenderWindow& window, bool focused);
     void init(class Resources *res);
-    void processEvent(class Event *event);
+    bool processEvent(class Event *event);
 
     void updateTextures();
 
@@ -133,7 +134,7 @@ private:
     sf::IntRect        leftArrowArea;
     sf::IntRect        rightArrowArea;    
 
-    int selected = 1;
+    int selected = -1;
 
     sf::Vector2f textureViewStartPosition;
     sf::Vector2f textureViewEndPosition;
@@ -156,9 +157,14 @@ class EditBox : Component
 public:
     void draw(class Resources *res, sf::RenderWindow& window, bool focused);
     void init(class Resources *res);
-    void processEvent(class Event *event);
+    bool processEvent(class Event *event);
 
+    bool addCharacter(int character);
+    std::string getBuffer() { return buffer; }
 private:
     std::string buffer;
+    
+    sf::RectangleShape componentBackground;
+
 };
 

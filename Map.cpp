@@ -156,9 +156,7 @@ std::vector <Block *> Map::getBlocksOnCamera(sf::View& camera)
                 result.insert(std::end(result), std::begin(blockGrid[index]), std::end(blockGrid[index]));
         }
     }
-    
-//    std::cout << "Result size: " << result.size() << std::endl;
-
+   
     return result;
 }
 

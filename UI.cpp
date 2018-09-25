@@ -21,7 +21,7 @@ void UI::sendEvent(class Event *event)
         i->processEvent(event);
 }
 
-void UI::createComponent(int type, sf::IntRect area, std::string name, class Resources *res)
+Component *UI::createComponent(int type, sf::IntRect area, std::string name, class Resources *res, bool canBeSelected)
 {
     Component *component = nullptr;
     
@@ -55,10 +55,13 @@ void UI::createComponent(int type, sf::IntRect area, std::string name, class Res
         component->setName(name);
         component->ID = UI::getNextID();
         component->uiParent = this;
+        component->canBeSelected = canBeSelected;
         component->init(res);
 
         addComponent(component);
     }
+
+    return component;
 }
 
 void UI::addComponent(Component *component)
@@ -67,9 +70,35 @@ void UI::addComponent(Component *component)
     drawOrder[component->getLayerPosition()].emplace_back(component);
 }
 
-void Component::processEvent(class Event *event)
+bool Component::processEvent(class Event *event)
 {
+    if (event->receiver != nullptr && event->receiver != this)
+        return false;
 
+
+    switch(event->type)
+    {
+    case RESERVED:
+    break;
+
+    case MOUSE_CLICK_EVENT:
+    {
+        MouseClickEventData *data = (MouseClickEventData *)event->data;
+        
+        if ( !data->pressed && inRect(data->position, getArea()) )
+        {
+            if ( getCanBeSelected() )
+            {
+                event->ui->setFocusedComponent(this->getID());
+            }
+            
+        }
+    } break;
+
+    default: break;
+    }
+
+    return true;
 }
 
 void Component::update()
@@ -127,6 +156,7 @@ void BlockSelectList::init(class Resources *res)
     textures.resize(textureViewCount);
 
     firstTextureToShow = res->getMinTextureKey();
+    selected = firstTextureToShow;
     updateTextures();    
 }
 
@@ -171,16 +201,21 @@ void BlockSelectList::draw(class Resources *res, sf::RenderWindow& window, bool 
         textureSprite.setPosition(x, textureViewStartPosition.y+1);
         window.draw(textureSprite);
 
+        if ( textures[c].ID ==  selected )
+            box.setOutlineColor(sf::Color::Magenta);
+        else
+            box.setOutlineColor(sf::Color::Yellow);
+
         box.setPosition(x, textureViewStartPosition.y);
         window.draw(box);
     }
 
 }
 
-void BlockSelectList::processEvent(class Event *event)
+bool BlockSelectList::processEvent(class Event *event)
 {
-    if (event->receiver != nullptr && event->receiver != this)
-        return;
+    if (!Component::processEvent(event) )
+        return false;
 
     switch(event->type)
     {
@@ -216,6 +251,7 @@ void BlockSelectList::processEvent(class Event *event)
                     if ( textures[index].texture )
                     {
                         event->ui->setBlockID(textures[index].ID);
+                        selected = textures[index].ID;
                     }
                      
            }
@@ -225,7 +261,7 @@ void BlockSelectList::processEvent(class Event *event)
     default: break;
     }
 
-    
+    return true;
 }
 
 void BlockSelectList::updateTextures()
@@ -247,28 +283,68 @@ void BlockSelectList::updateTextures()
     }
 }
 
-void EditBox::draw(class Resources *res, sf::RenderWindow& window, bool focused)
-{
-
-}
-
 void EditBox::init(class Resources *res)
 {
+    componentBackground.setPosition({(float)getArea().left, (float)getArea().top});
+    componentBackground.setFillColor({20,20,20});
+    componentBackground.setOutlineThickness(1.0f);
+    componentBackground.setSize({(float)getArea().width, (float)getArea().height});
+}
+
+void EditBox::draw(class Resources *res, sf::RenderWindow& window, bool focused)
+{
+    if(focused)
+        componentBackground.setOutlineColor(sf::Color::Yellow);
+    else
+        componentBackground.setOutlineColor(sf::Color::Green);
+    
+    window.draw(componentBackground);
 
 }
 
-void EditBox::processEvent(class Event *event)
+
+bool EditBox::processEvent(class Event *event)
 {
-    if (event->receiver != nullptr && event->receiver != this)
-        return;
+    if ( !Component::processEvent(event) )
+        return false;
 
     switch(event->type)
     {
         case TEXT_ENTERED_EVENT:
         {
-            
+            if (event->ui->getFocusedComponent() == this->getID())
+            {
+                int *character = (int *)event->data;
+                if ( addCharacter(*character) )
+                    event->ui->setFocusedComponent(-1);
+            }
         } break;
 
         default: break;
     }
+    return true;
+}
+
+// Return true if we want to remove focus from component
+bool EditBox::addCharacter(int character)
+{
+
+    if ( isprint(character) )
+    {
+        buffer.push_back(character);
+    }
+    else
+    {
+        if ( character == 13 || character == 27) // Enter or escape
+        {
+            std::cout << (char)character;
+            return true;
+        } else if ( character == 8) // Backspace
+        {
+            if ( !buffer.empty() )
+                buffer.pop_back();
+        }
+    }
+
+    return false;
 }

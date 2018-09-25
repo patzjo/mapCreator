@@ -33,7 +33,30 @@ void init(sf::RectangleShape& viewOutlines, sf::IntRect& viewArea, UI& ui, sf::V
                         (int)(screenW*0.8f), (int)(screenH*toolAreaHeight)-4},
                         "Tool", res);
 
-    //ui.createComponent(EDIT_BOX, );
+    Component *component = nullptr;
+    int editBoxHeight = (int)(screenH*(toolAreaHeight/3))-5;
+    int editBoxWidth = (int)(screenW*0.2f)-3;
+
+    component = ui.createComponent(EDIT_BOX, {(int)(screenW*0.8f)+2, (int)(screenH*(1.0f-toolAreaHeight))+5, 
+                                  editBoxWidth, editBoxHeight}, 
+                                  "filename", res, true);
+    component = ui.createComponent(EDIT_BOX, {component->getArea().left, component->getArea().top + (int)(screenH*(toolAreaHeight/3)-2), 
+                                  editBoxWidth, editBoxHeight }, 
+                                  "Author", res, true);
+    component = ui.createComponent(EDIT_BOX, {component->getArea().left, component->getArea().top + (int)(screenH*(toolAreaHeight/3)-2), 
+                                  editBoxWidth, editBoxHeight }, 
+                                  "Description", res, true);
+/*
+    component = ui.createComponent(EDIT_BOX, {(int)(screenW*0.8f)+2, (int)(screenH*(1.0f-toolAreaHeight)+5), 
+                                  (int)(screenW*0.2f)-3, (int)(screenH*(toolAreaHeight/3))-3 }, 
+                                  "filename", res, true);
+    component = ui.createComponent(EDIT_BOX, {(int)(screenW*0.8f)+2, (int)(screenH*(1.0f-toolAreaHeight)+5) + (int)(screenH*(toolAreaHeight/3))-2, 
+                                  (int)(screenW*0.2f)-3, (int)(screenH*(toolAreaHeight/3))-3 }, 
+                                  "Author", res, true);
+    component = ui.createComponent(EDIT_BOX, {(int)(screenW*0.8f)+2, (int)(screenH*(1.0f-toolAreaHeight)+5) + (int)(screenH*(toolAreaHeight/3))-2 + (int)(screenH*(toolAreaHeight/3)-2), 
+                                  (int)(screenW*0.2f)-3, (int)(screenH*(toolAreaHeight/3))-3 }, 
+                                  "Description", res, true);
+*/
 }
 
 int main( int argc, char **argv )
