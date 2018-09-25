@@ -294,7 +294,7 @@ void EditBox::init(class Resources *res)
 void EditBox::draw(class Resources *res, sf::RenderWindow& window, bool focused)
 {
     if(focused)
-        componentBackground.setOutlineColor(sf::Color::Yellow);
+        componentBackground.setOutlineColor(sf::Color::Red);
     else
         componentBackground.setOutlineColor(sf::Color::Green);
     
