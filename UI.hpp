@@ -161,10 +161,12 @@ public:
 
     bool addCharacter(int character);
     std::string getBuffer() { return buffer; }
+    void setBuffer(std::string str) { buffer = str; setVisibleString( buffer ); }
+    void setVisibleString(std::string);
 private:
     std::string buffer;
     
     sf::RectangleShape componentBackground;
-
+    sf::Text text;
 };
 

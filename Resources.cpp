@@ -65,3 +65,18 @@ void Resources::loadBlocks(std::string directory)
         blockTextures.emplace(stoi(id), texture);
     }
 }
+
+bool Resources::loadFont(std::string filename)
+{
+    sf::Font *font = new sf::Font;
+
+    if ( !font->loadFromFile(filename) )
+    {
+        std::cout << "Error loading font!" << std::endl;
+        delete font;
+    }
+
+    fonts.emplace_back(font);
+    
+    return font!=nullptr;
+}

@@ -38,7 +38,18 @@ public:
         return blockTextures.rbegin()->first;
     }
 
+    sf::Font *getFont(unsigned int id)
+    {
+        if ( id < fonts.size() )
+            return fonts[id];
+        else
+            return nullptr;
+    }
+
+    bool loadFont(std::string filename);
+
 private:
     std::map <int, sf::Texture *> blockTextures;
-
+    std::vector <sf::Font *> fonts;
+    
 };

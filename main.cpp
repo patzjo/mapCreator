@@ -13,6 +13,10 @@ const int screenH = 1080;
 const float toolAreaHeight = 0.1f;
 const float toolAreaWidth  = 0.9f;
 
+const std::string defaultFilename = "Map name";
+const std::string defaultAuthor   = "Author";
+const std::string defaultDescription = "Description here.";
+
 void init(sf::RectangleShape& viewOutlines, sf::IntRect& viewArea, UI& ui, sf::View& camera, class Resources *res)
 {
     viewOutlines.setFillColor(sf::Color::Transparent);
@@ -34,29 +38,24 @@ void init(sf::RectangleShape& viewOutlines, sf::IntRect& viewArea, UI& ui, sf::V
                         "Tool", res);
 
     Component *component = nullptr;
+
     int editBoxHeight = (int)(screenH*(toolAreaHeight/3))-5;
     int editBoxWidth = (int)(screenW*0.2f)-3;
 
     component = ui.createComponent(EDIT_BOX, {(int)(screenW*0.8f)+2, (int)(screenH*(1.0f-toolAreaHeight))+5, 
                                   editBoxWidth, editBoxHeight}, 
                                   "filename", res, true);
+    ((EditBox *)component)->setBuffer(defaultFilename);
+
     component = ui.createComponent(EDIT_BOX, {component->getArea().left, component->getArea().top + (int)(screenH*(toolAreaHeight/3)-2), 
                                   editBoxWidth, editBoxHeight }, 
                                   "Author", res, true);
+    ((EditBox *)component)->setBuffer(defaultAuthor);
+
     component = ui.createComponent(EDIT_BOX, {component->getArea().left, component->getArea().top + (int)(screenH*(toolAreaHeight/3)-2), 
                                   editBoxWidth, editBoxHeight }, 
                                   "Description", res, true);
-/*
-    component = ui.createComponent(EDIT_BOX, {(int)(screenW*0.8f)+2, (int)(screenH*(1.0f-toolAreaHeight)+5), 
-                                  (int)(screenW*0.2f)-3, (int)(screenH*(toolAreaHeight/3))-3 }, 
-                                  "filename", res, true);
-    component = ui.createComponent(EDIT_BOX, {(int)(screenW*0.8f)+2, (int)(screenH*(1.0f-toolAreaHeight)+5) + (int)(screenH*(toolAreaHeight/3))-2, 
-                                  (int)(screenW*0.2f)-3, (int)(screenH*(toolAreaHeight/3))-3 }, 
-                                  "Author", res, true);
-    component = ui.createComponent(EDIT_BOX, {(int)(screenW*0.8f)+2, (int)(screenH*(1.0f-toolAreaHeight)+5) + (int)(screenH*(toolAreaHeight/3))-2 + (int)(screenH*(toolAreaHeight/3)-2), 
-                                  (int)(screenW*0.2f)-3, (int)(screenH*(toolAreaHeight/3))-3 }, 
-                                  "Description", res, true);
-*/
+    ((EditBox *)component)->setBuffer(defaultDescription);
 }
 
 int main( int argc, char **argv )
@@ -80,6 +79,10 @@ int main( int argc, char **argv )
 
 
     myResources.loadBlocks("blocks");
+    if ( !myResources.loadFont("AkaashNormal.ttf") )
+    {
+        std::cout << "Can't load font!" << std::endl;
+    }
 
     sf::RectangleShape viewOutlines;
     sf::IntRect viewArea;
@@ -113,19 +116,16 @@ int main( int argc, char **argv )
                                                         event.mouseButton.button, true);
 
                 myUI.createEvent(myEvent, MOUSE_CLICK_EVENT, (void*)&mouseClickEventData, &myResources);
-//                myUI.sendEvent(&myEvent);
             } else if ( event.type == sf::Event::MouseButtonReleased )
             {
                 MouseClickEventData mouseClickEventData({event.mouseButton.x, event.mouseButton.y}, 
                                                         event.mouseButton.button, false);
 
                 myUI.createEvent(myEvent, MOUSE_CLICK_EVENT, (void*)&mouseClickEventData, &myResources);
-//                myUI.sendEvent(&myEvent);
             } else if (event.type == sf::Event::TextEntered)
             {
                 
                 myUI.createEvent(myEvent, TEXT_ENTERED_EVENT, (void *)&event.text.unicode);
-//                myUI.sendEvent(&myEvent);
             }
 
         }

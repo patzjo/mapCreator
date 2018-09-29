@@ -289,6 +289,13 @@ void EditBox::init(class Resources *res)
     componentBackground.setFillColor({20,20,20});
     componentBackground.setOutlineThickness(1.0f);
     componentBackground.setSize({(float)getArea().width, (float)getArea().height});
+
+    text.setFont(*res->getFont(0));
+    text.setCharacterSize(getArea().height*0.80f);
+    text.setFillColor(sf::Color::White);
+//    text.setOutlineColor(sf::Color::White);
+//    text.setOutlineThickness(1.5f);
+    text.setPosition({(float)getArea().left+4.0f, (float)getArea().top-4});
 }
 
 void EditBox::draw(class Resources *res, sf::RenderWindow& window, bool focused)
@@ -299,6 +306,10 @@ void EditBox::draw(class Resources *res, sf::RenderWindow& window, bool focused)
         componentBackground.setOutlineColor(sf::Color::Green);
     
     window.draw(componentBackground);
+    
+
+    if ( !buffer.empty() )
+        window.draw(text);
 
 }
 
@@ -331,20 +342,37 @@ bool EditBox::addCharacter(int character)
 
     if ( isprint(character) )
     {
+        std::cout << (char)character;
         buffer.push_back(character);
+        setVisibleString(buffer);
     }
     else
     {
         if ( character == 13 || character == 27) // Enter or escape
         {
-            std::cout << (char)character;
             return true;
         } else if ( character == 8) // Backspace
         {
             if ( !buffer.empty() )
+            {
                 buffer.pop_back();
+                setVisibleString(buffer);
+            }
         }
     }
 
     return false;
+}
+
+void EditBox::setVisibleString(std::string str)
+{
+    std::string anotherString;
+    text.setString("");
+    
+    while( (text.getLocalBounds().width+10) < getArea().width && !str.empty())
+    {
+        anotherString.insert(0, 1, str.back());
+        str.pop_back();
+        text.setString(anotherString);
+    }
 }
