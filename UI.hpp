@@ -95,7 +95,8 @@ public:
     void setFocusedComponent(int componentID) { focusedComponent = componentID; }
     void setBlockID( int ID ) { blockID = ID; }
     int getBlockID() { return blockID; }
-    
+    bool isComponentFocused() { return focusedComponent!=-1;}
+
     void setSelectedBlock(int selectedBlockID) { selectedBlock = selectedBlockID; };
     int getSelectedBlock() { return selectedBlock; };
 

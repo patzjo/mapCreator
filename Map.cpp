@@ -15,7 +15,7 @@ Map::~Map()
     clear();
 }
 
-bool Map::saveMap(std::string filename)
+bool Map::saveMap()
 {
     std::fstream mapFile;
     if(fs::exists(filename))
@@ -113,7 +113,6 @@ void Map::clear()
 {
     info.name       = "";
     info.author     = "";
-    info.filename   = "";
     info.width      = 0;
     info.height     = 0;
 
@@ -233,7 +232,6 @@ void Map::createNew(std::string filename, int width, int height, std::string nam
     info.author = author;
     info.width = width;
     info.height = height;
-    info.filename = filename;
 
     mapReady = true;
 }

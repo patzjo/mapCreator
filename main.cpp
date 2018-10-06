@@ -119,12 +119,16 @@ int main( int argc, char **argv )
             if ( event.type == sf::Event::Closed )
             {
                 window.close();
-            } else if( event.type == sf::Event::KeyReleased)
+            } else if( event.type == sf::Event::KeyReleased && !myUI.isComponentFocused())
             {
                 switch(event.key.code)
                 {
                     case sf::Keyboard::Key::Escape:
                         window.close();
+                    break;
+
+                    case sf::Keyboard::Key::S:
+                        myMap.saveMap();
                     break;
 
                     default: break;
