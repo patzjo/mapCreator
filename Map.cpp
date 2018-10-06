@@ -167,15 +167,20 @@ void Map::draw(sf::RenderWindow& window, sf::View& camera, class Resources *res)
         return;
 
     window.setView(camera);
-    sf::Sprite sprite;
 
     for ( auto *block : getBlocksOnCamera(camera) )
     {
+        sf::Sprite sprite;
+/*
         sprite.setTexture(*res->getTexture(block->id));
         sprite.setOrigin(sprite.getTextureRect().width/2, sprite.getTextureRect().height/2);
         sprite.setPosition(block->x, block->y);
         sprite.setRotation(block->angle);
-
+*/
+        sprite.setTexture(*res->getTexture(block->id));
+        sprite.setOrigin(sprite.getTexture()->getSize().x/2.0f, sprite.getTexture()->getSize().y/2.0f);
+        sprite.setPosition(block->x, block->y);
+        sprite.setRotation(block->angle);
         window.draw(sprite);
     }
 

@@ -17,15 +17,36 @@ sf::Texture *Resources::getTexture(int id)
     return nullptr;
 }
 
-int Resources::getNextKeyFromTexture(int id)
+int Resources::getNextKeyFromTexture(int id, int howManyKeysNeedToBeAfter)
 {
     auto it = blockTextures.find(id);
     auto nextOne = std::next(it);
 
-    if ( nextOne != blockTextures.end() )
-        return nextOne->first;
+    if ( howManyKeysNeedToBeAfter == 0 )
+    {
+        if ( nextOne != blockTextures.end() )
+            return nextOne->first;
+        else
+            return -1;
+    }
     else
-        return -1;
+    {
+        bool enoughtKeys = true;
+        int key = getNextKeyFromTexture(id);
+        int nextKey = key;
+        for ( unsigned int c = 0; c <= howManyKeysNeedToBeAfter && enoughtKeys; c++ )
+        {
+            if ( key == -1 )
+                enoughtKeys = false;
+            else
+                key = getNextKeyFromTexture(key);
+        }
+        
+        if ( enoughtKeys )
+            return nextKey;
+        else
+            return -1;
+    }
 }
 
 int Resources::getPrevKeyFromTexture(int id)

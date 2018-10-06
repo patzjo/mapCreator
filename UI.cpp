@@ -115,7 +115,7 @@ void BlockSelectList::init(class Resources *res)
     float arrowControlWidth = (float)getArea().width*0.05f;
     this->res = res;
 
-    componentBackground.setFillColor(sf::Color::Red);
+    componentBackground.setFillColor(sf::Color::Transparent);
     componentBackground.setPosition((sf::Vector2f)getPosition());
     componentBackground.setSize({(float)getArea().width, (float)getArea().height});
 
@@ -132,21 +132,38 @@ void BlockSelectList::init(class Resources *res)
     textureViewEndPosition.x   = getPosition().x + getArea().width - arrowControlWidth;
     
     textureViewStartPosition.y = getPosition().y;
-    textureViewEndPosition.y   = getPosition().y;
+    textureViewEndPosition.y   = getPosition().y + getArea().height;
 
     textureViewWidth = textureViewEndPosition.x - textureViewStartPosition.x;
     textureViewHeight = getArea().height;
 
-    textureViewWindowWidth = textureViewWidth/textureViewCount;
+    int textureViewWindowWidthTemp = textureViewWidth/textureViewCount;
+    //int textureViewWindowWidth = textureViewWidth/textureViewCount;
 
-    textureViewMargin = (textureViewWidth - textureViewWindowWidth * textureViewCount) / 2.0f;
+    //textureViewMargin = (textureViewWidth - textureViewWindowWidth * textureViewCount) / 2.0f;
+    textureViewMargin = (textureViewWidth - textureViewWindowWidthTemp * textureViewCount) / 2.0f;
+    blockWidthInView = (textureViewWidth-2*textureViewMargin)/textureViewCount - outlineSize;
 
-    textureSprite.setTextureRect({0, 0, textureViewWindowWidth, textureViewHeight});
+    blockHeightInView = textureViewHeight;
 
-    leftArrowArea.left = getPosition().x;
-    leftArrowArea.top  = getPosition().y;
-    leftArrowArea.width = arrowControlWidth;
-    leftArrowArea.height = getArea().height;
+    // Outline of selectable blocks in view
+//    blockOutline.setSize({(float)blockWidthInView, (float)textureViewHeight-1.0f});
+    blockOutline.setSize({(float)blockWidthInView-outlineSize, (float)textureViewHeight-outlineSize-1.0f});
+    blockOutline.setFillColor(sf::Color::Transparent);
+    blockOutline.setOutlineThickness(outlineSize);
+
+
+    // Text
+    text.setFont(*res->getFont(0));
+    text.setCharacterSize(24);
+    text.setFillColor(sf::Color::Green);
+
+    //textureSprite.setTextureRect({0, 0, textureViewWindowWidth, textureViewHeight});
+
+    leftArrowArea.left      = getPosition().x;
+    leftArrowArea.top       = getPosition().y;
+    leftArrowArea.width     = arrowControlWidth;
+    leftArrowArea.height    = getArea().height;
 
     rightArrowArea.left     = getPosition().x + getArea().width - arrowControlWidth;    
     rightArrowArea.top      = getPosition().y;
@@ -156,59 +173,88 @@ void BlockSelectList::init(class Resources *res)
     textures.resize(textureViewCount);
 
     firstTextureToShow = res->getMinTextureKey();
-    selected = firstTextureToShow;
+    selectedBlock = firstTextureToShow;
     updateTextures();    
 }
 
 void BlockSelectList::draw(class Resources *res, sf::RenderWindow& window, bool selected)
 {
     window.draw(componentBackground);
-    
+
+    // Left arrow
     arrowBackground.setPosition((sf::Vector2f)getPosition());
     window.draw(arrowBackground);
-
-    arrowBackground.setPosition({(float)(getPosition().x+getArea().width-arrowBackground.getLocalBounds().width), 
-                                 (float)getPosition().y});
-    window.draw(arrowBackground);
-
 
     arrow.setPosition({(float)getPosition().x+45, (float)getPosition().y+50});
     arrow.setRotation(-90.0f);
     window.draw(arrow);
 
+    // Right arrow
+    arrowBackground.setPosition({(float)(getPosition().x+getArea().width-arrowBackground.getLocalBounds().width), 
+                                 (float)getPosition().y});
+    window.draw(arrowBackground);
+    
     arrow.setPosition({(float)(getPosition().x+getArea().width-arrow.getLocalBounds().width+15),
                        (float)getPosition().y+50});
     arrow.setRotation(90.0f);
     window.draw(arrow);
 
+    float selectedBlockX = -1.0f;
 
-    sf::RectangleShape box; // Block borders
-    box.setSize({(float)textureViewWindowWidth, (float)textureViewHeight-1.0f});
-    box.setFillColor(sf::Color::Transparent);
-    box.setOutlineColor(sf::Color::Yellow);
-    box.setOutlineThickness(1.0f);
-
-
+    float x = textureViewStartPosition.x + textureViewMargin;
     for(unsigned int c = 0; c < textureViewCount; c++ )
     {
+        sf::Sprite textureSprite = {};
         
         sf::Texture *texture = textures[c].texture;
         if(!texture)
             break;
 
-        float x = textureViewStartPosition.x + textureViewMargin + (c*textureViewWindowWidth);
-        textureSprite.setTexture(*res->getTexture(1));
+        float xScale = blockWidthInView/texture->getSize().x;
+        float yScale = blockHeightInView/texture->getSize().y;
+
+        textureSprite.setTexture(*texture);
+        textureSprite.setScale(xScale, yScale);
         textureSprite.setPosition(x, textureViewStartPosition.y+1);
         window.draw(textureSprite);
 
-        if ( textures[c].ID ==  selected )
-            box.setOutlineColor(sf::Color::Magenta);
+        if ( textures[c].ID ==  selectedBlock )
+        {
+            selectedBlockX = x;
+        }
         else
-            box.setOutlineColor(sf::Color::Yellow);
+        {
+            blockOutline.setPosition(x+outlineSize, textureViewStartPosition.y+outlineSize);
+            window.draw(blockOutline);
+        }
 
-        box.setPosition(x, textureViewStartPosition.y);
-        window.draw(box);
+
+        text.setPosition(x + blockWidthInView/2 - (text.getLocalBounds().width/2),  
+                        textureViewEndPosition.y - text.getLocalBounds().height*2 );
+        text.setString(std::to_string(textures[c].ID));
+
+        window.draw(text);
+
+        x += + blockWidthInView + outlineSize;
     }
+    float selectedBlockOutlineSize = 2.0f*outlineSize;
+    if ( selectedBlockX >= 0.0f )
+    {
+        blockOutline.setSize({(float)blockWidthInView-selectedBlockOutlineSize, (float)textureViewHeight-selectedBlockOutlineSize-2});
+
+        blockOutline.setFillColor(sf::Color(255,0,255,155));
+        blockOutline.setOutlineColor(sf::Color::Red);
+        blockOutline.setOutlineThickness(selectedBlockOutlineSize);
+        blockOutline.setPosition(selectedBlockX+selectedBlockOutlineSize, textureViewStartPosition.y+selectedBlockOutlineSize);
+        window.draw(blockOutline);
+
+        blockOutline.setSize({(float)blockWidthInView-outlineSize, (float)textureViewHeight-outlineSize-2});
+        blockOutline.setOutlineThickness(outlineSize);
+        blockOutline.setFillColor(sf::Color::Transparent);
+        blockOutline.setOutlineColor(sf::Color::White);
+    }
+
+
 
 }
 
@@ -237,7 +283,7 @@ bool BlockSelectList::processEvent(class Event *event)
             }
             else if ( inRect(data->position, rightArrowArea) )
             {
-                int nextID = event->res->getNextKeyFromTexture(firstTextureToShow);
+                int nextID = event->res->getNextKeyFromTexture(firstTextureToShow, 9);
                 if ( nextID != -1 )
                     firstTextureToShow = nextID;
                 updateTextures();
@@ -245,13 +291,13 @@ bool BlockSelectList::processEvent(class Event *event)
             else 
             {
                 int posX = data->position.x - textureViewStartPosition.x;
-                int index = posX / textureViewWindowWidth;
+                int index = posX / blockWidthInView;
 
                 if ( index < textureViewCount )
                     if ( textures[index].texture )
                     {
                         event->ui->setBlockID(textures[index].ID);
-                        selected = textures[index].ID;
+                        selectedBlock = textures[index].ID;
                     }
                      
            }

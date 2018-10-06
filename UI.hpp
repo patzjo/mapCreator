@@ -65,7 +65,8 @@ private:
     int ID = 0;
     std::string name;
     bool visible = true;
-    class UI *uiParent;
+    class UI *uiParent = nullptr;
+    class Component *componentParent = nullptr;
     bool canBeSelected = false;
 };
 
@@ -130,11 +131,12 @@ private:
     sf::RectangleShape componentBackground;
     sf::RectangleShape arrowBackground;
     sf::CircleShape    arrow;
-    sf::Sprite         textureSprite;
     sf::IntRect        leftArrowArea;
     sf::IntRect        rightArrowArea;    
 
-    int selected = -1;
+    sf::Text text;
+
+    int selectedBlock = -1;
 
     sf::Vector2f textureViewStartPosition;
     sf::Vector2f textureViewEndPosition;
@@ -144,11 +146,16 @@ private:
     const int textureViewCount = 10;
     int textureViewMargin = 5;
 
-    int textureViewWindowWidth;
+    float blockWidthInView;
+    float blockHeightInView;
     int firstTextureToShow = 1;
 
     std::vector <BlockTexture> textures;
     class Resources *res;
+
+    float outlineSize = 1.0f;
+    sf::RectangleShape blockOutline; // Block borders
+
 };
 
 
@@ -170,3 +177,17 @@ private:
     sf::Text text;
 };
 
+class MessageBox : Component
+{
+public:
+    void draw(class Resource *res, sf::RenderWindow& window, bool focused);
+    void init( class Resources *res );
+    bool processEvent( class Event *event );
+
+    enum MESSAGE_BOX_TYPE { MSG_OK, MSG_OK_CANCEL, MSG_CUSTOM };
+
+private:
+    std::string title;
+
+    int type;
+};

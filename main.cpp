@@ -79,18 +79,18 @@ int main( int argc, char **argv )
 
 
     myResources.loadBlocks("blocks");
+
     if ( !myResources.loadFont("AkaashNormal.ttf") )
-    {
         std::cout << "Can't load font!" << std::endl;
-    }
 
     sf::RectangleShape viewOutlines;
     sf::IntRect viewArea;
 
     init( viewOutlines, viewArea, myUI, camera, &myResources);
-
+    sf::Clock myClock;
     while(window.isOpen())
     {
+        float deltaTime = myClock.restart().asSeconds();
         sf::Vector2i mousePos = sf::Mouse::getPosition(window);
         sf::Event event;
         
@@ -134,24 +134,29 @@ int main( int argc, char **argv )
         camera.move({-1, 0});
         if(camera.getCenter().x < cameraMinX)
             camera.setCenter(cameraMinX, camera.getCenter().y);
+
+        std::cout << "Camera: " << camera.getCenter().x << " x " << camera.getCenter().y << std::endl; 
     }
     if ( sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
     {
         camera.move({1, 0});
         if(camera.getCenter().x > cameraMaxX)
             camera.setCenter(cameraMaxX, camera.getCenter().y);
+        std::cout << "Camera: " << camera.getCenter().x << " x " << camera.getCenter().y << std::endl; 
     }
     if ( sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
     {
         camera.move({0, -1});
         if(camera.getCenter().y < cameraMinY)
             camera.setCenter(camera.getCenter().x, cameraMinY);
+        std::cout << "Camera: " << camera.getCenter().x << " x " << camera.getCenter().y << std::endl; 
     }
     if ( sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
     {
         camera.move({0, 1});
         if(camera.getCenter().y > cameraMaxY)
             camera.setCenter(camera.getCenter().x, cameraMaxY);
+        std::cout << "Camera: " << camera.getCenter().x << " x " << camera.getCenter().y << std::endl; 
     }
 
     if( sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))

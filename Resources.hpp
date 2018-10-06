@@ -22,7 +22,7 @@ public:
     void loadBlocks(std::string directory);
 
     sf::Texture *getTexture(int id);
-    int getNextKeyFromTexture(int id);
+    int getNextKeyFromTexture(int id, int howManyKeysNeedToBeAfter = 0);
     int getPrevKeyFromTexture(int id);
 
     int getMinTextureKey() { 
