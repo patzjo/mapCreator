@@ -58,6 +58,7 @@ bool Map::saveMap()
 
 bool Map::loadMap(std::string filename)
 {
+    char readBuffer[256] = {};
     std::fstream mapFile;
 
     mapFile.open(filename, std::ios::in | std::ios::binary);
@@ -82,12 +83,17 @@ bool Map::loadMap(std::string filename)
         mapFile.read((char *)&nameLength,               1); // Name length
         mapFile.read((char *)&authorLength,             1); // Author name length
     
-        mapFile.write(info.name.c_str(),                nameLength);    // Name
-        mapFile.write(info.author.c_str(),              authorLength);  // Author name
+        mapFile.read(readBuffer,                nameLength);    // Name
+        readBuffer[nameLength] = 0;
+        info.name = readBuffer;
 
-        mapFile.write((const char *)&blockCount,        4); // Block count
+        mapFile.read(readBuffer,              authorLength);  // Author name
+        readBuffer[authorLength] = 0;
+        info.author = readBuffer;
 
-        for( auto* block : blocks )
+        mapFile.read((char *)&blockCount,        4); // Block count
+
+        for( unsigned int c = 0; c < blockCount; c++ )
         {
             Block *blockPointer = new Block;
 
@@ -97,6 +103,8 @@ bool Map::loadMap(std::string filename)
             mapFile.read((char *)&blockPointer->id,      4);
 
             blocks.push_back(blockPointer);
+            blockGrid[getGridNumber(blockPointer->x, blockPointer->y)].emplace_back(blockPointer);
+
         }
         
         mapFile.close();
@@ -104,6 +112,7 @@ bool Map::loadMap(std::string filename)
     else
         return false;
     
+    this->filename = filename.substr(0, filename.find_last_of('.'));
     saved = true;
     mapReady = true;
     return true;

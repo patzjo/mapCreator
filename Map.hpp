@@ -67,8 +67,12 @@ public:
 
     void setWidthandHeight(int width, int height) { info.width = width; info.height = height;}
     void setFilename(std::string nameOfFile) {filename = nameOfFile + ".map";}
-    void setName(std::string nameOfLevel)  {info.name = nameOfLevel;}
+    void setName(std::string nameOfLevel)    {info.name = nameOfLevel;}
     void setAuthor(std::string authorName)   {info.author = authorName;}
+
+    std::string getFilename()   { return filename; }
+    std::string getName()       { return info.name; }
+    std::string getAuthor()     { return info.author; }
 
 private:
     void clear();

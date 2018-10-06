@@ -15,9 +15,9 @@ const float TextShownTime = 3.0f;
 const float toolAreaHeight = 0.1f;
 const float toolAreaWidth  = 0.9f;
 
-const std::string defaultFilename = "Map name";
-const std::string defaultAuthor   = "Author";
-const std::string defaultDescription = "Description here.";
+const std::string defaultFilename = "DefaultMapName";
+const std::string defaultAuthor   = "DefaultAuthor";
+const std::string defaultDescription = "MapTitle";
 
 void init(sf::RectangleShape& viewOutlines, sf::IntRect& viewArea, UI& ui, sf::View& camera, class Resources *res)
 {
@@ -51,12 +51,12 @@ void init(sf::RectangleShape& viewOutlines, sf::IntRect& viewArea, UI& ui, sf::V
 
     component = ui.createComponent(EDIT_BOX, {component->getArea().left, component->getArea().top + (int)(screenH*(toolAreaHeight/3)-2), 
                                   editBoxWidth, editBoxHeight }, 
-                                  "Author", res, true);
+                                  "author", res, true);
     ((EditBox *)component)->setBuffer(defaultAuthor);
 
     component = ui.createComponent(EDIT_BOX, {component->getArea().left, component->getArea().top + (int)(screenH*(toolAreaHeight/3)-2), 
                                   editBoxWidth, editBoxHeight }, 
-                                  "Description", res, true);
+                                  "name", res, true);
     ((EditBox *)component)->setBuffer(defaultDescription);
 }
 
@@ -127,8 +127,32 @@ int main( int argc, char **argv )
                         window.close();
                     break;
 
-                    case sf::Keyboard::Key::S:
-                        myMap.saveMap();
+                    case sf::Keyboard::Key::F1:
+                    {
+                        std::string fname  = myUI.getComponentByName<EditBox>("filename")->getBuffer();
+                        std::string name   = myUI.getComponentByName<EditBox>("name")->getBuffer();
+                        std::string author = myUI.getComponentByName<EditBox>("author")->getBuffer();
+                        
+                        // TODO(Jonne): Better validation :P
+                        if ( !fname.empty() && !name.empty() && !author.empty() )
+                        {
+                            std::cout << "Saving '" << name << "' map from '" << author << "' to '" << fname << ".map'" << std::endl;
+                            
+                            myMap.setFilename(fname);
+                            myMap.setName(name);
+                            myMap.setAuthor(author);
+                            myMap.saveMap(); 
+                        }
+                    }
+                    break;
+
+                    case sf::Keyboard::Key::F2:
+                    {
+                        myMap.loadMap("myFirstMap.map");
+                        myUI.getComponentByName<EditBox>("filename")->setBuffer(myMap.getFilename());
+                        myUI.getComponentByName<EditBox>("name")->setBuffer(myMap.getName());
+                        myUI.getComponentByName<EditBox>("author")->setBuffer(myMap.getAuthor());
+                    }
                     break;
 
                     default: break;
@@ -152,28 +176,28 @@ int main( int argc, char **argv )
             }
 
         }
-    if ( sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+    if ( sf::Keyboard::isKeyPressed(sf::Keyboard::A))
     {
         camera.move({-1, 0});
         if(camera.getCenter().x < cameraMinX)
             camera.setCenter(cameraMinX, camera.getCenter().y);
         textTimeInScreen = TextShownTime;
     }
-    if ( sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+    if ( sf::Keyboard::isKeyPressed(sf::Keyboard::D))
     {
         camera.move({1, 0});
         if(camera.getCenter().x > cameraMaxX)
             camera.setCenter(cameraMaxX, camera.getCenter().y);
         textTimeInScreen = TextShownTime;
     }
-    if ( sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+    if ( sf::Keyboard::isKeyPressed(sf::Keyboard::W))
     {
         camera.move({0, -1});
         if(camera.getCenter().y < cameraMinY)
             camera.setCenter(camera.getCenter().x, cameraMinY);
         textTimeInScreen = TextShownTime;
     }
-    if ( sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+    if ( sf::Keyboard::isKeyPressed(sf::Keyboard::S))
     {
         camera.move({0, 1});
         if(camera.getCenter().y > cameraMaxY)
@@ -219,7 +243,6 @@ int main( int argc, char **argv )
         window.setView(window.getDefaultView());
     }
 
-    std::cout << textTimeInScreen << std::endl;
     if ( textTimeInScreen > 0.0f )
     {
         std::string str;

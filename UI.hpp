@@ -100,6 +100,15 @@ public:
     void setSelectedBlock(int selectedBlockID) { selectedBlock = selectedBlockID; };
     int getSelectedBlock() { return selectedBlock; };
 
+    template <class T>
+    T *getComponentByName(std::string name) {
+        for ( auto *component : components )
+            if ( component->name == name )
+                return static_cast<T*>(component);
+
+        return nullptr;
+    }
+
 private: 
     void addComponent(Component *component);
     
@@ -115,7 +124,7 @@ private:
     int selectedBlock = 1;
 };
 
-class BlockSelectList : Component
+class BlockSelectList : public Component
 {
     friend class Map;
 public:
@@ -174,7 +183,7 @@ private:
 };
 
 
-class EditBox : Component
+class EditBox : public Component
 {
 public:
     void draw(class Resources *res, sf::RenderWindow& window, bool focused);
@@ -186,6 +195,7 @@ public:
     void setBuffer(std::string str) { buffer = str; setVisibleString( buffer ); }
     void setVisibleString(std::string);
 
+    
 protected:
     std::string buffer;
     
@@ -193,7 +203,7 @@ protected:
     sf::Text text;
 };
 
-class MessageBox : Component
+class MessageBox : public Component
 {
 public:
     void draw(class Resource *res, sf::RenderWindow& window, bool focused);
