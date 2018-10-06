@@ -56,7 +56,7 @@ public:
     int  getLayerPosition() { return layerPosition; }
     bool getCanBeSelected() { return canBeSelected; }
 
-private:
+protected:
     sf::IntRect  area;
 
     int layerPosition = 1;
@@ -96,6 +96,9 @@ public:
     void setBlockID( int ID ) { blockID = ID; }
     int getBlockID() { return blockID; }
     
+    void setSelectedBlock(int selectedBlockID) { selectedBlock = selectedBlockID; };
+    int getSelectedBlock() { return selectedBlock; };
+
 private: 
     void addComponent(Component *component);
     
@@ -107,6 +110,8 @@ private:
     int getNextID() { return nextID++; }
     int nextID = 1;
     int blockID = -1;
+    
+    int selectedBlock = 1;
 };
 
 class BlockSelectList : Component
@@ -121,6 +126,14 @@ public:
 
     void updateTextures();
 
+    void setSelectedBlock( int selectedBlockID ) 
+    {
+        selectedBlock = selectedBlockID;
+        
+        if ( uiParent )
+            uiParent->setSelectedBlock(selectedBlock);
+    }
+
 private:
     struct BlockTexture
     {
@@ -128,33 +141,34 @@ private:
         sf::Texture *texture = nullptr;
     }; 
 
-    sf::RectangleShape componentBackground;
-    sf::RectangleShape arrowBackground;
-    sf::CircleShape    arrow;
-    sf::IntRect        leftArrowArea;
-    sf::IntRect        rightArrowArea;    
+    sf::RectangleShape componentBackground; // Background of the component
+    sf::RectangleShape arrowBackground;     // Background of the arrow
+    sf::CircleShape    arrow;               // Arrow
+    sf::IntRect        leftArrowArea;       // Area where to click to move the list backwards
+    sf::IntRect        rightArrowArea;      // Area where to click to move the list forward
 
-    sf::Text text;
+    sf::Text text;                          // ID Texts
 
-    int selectedBlock = -1;
+    int selectedBlock = -1;                 // Block which is selected
 
-    sf::Vector2f textureViewStartPosition;
+    sf::Vector2f textureViewStartPosition;  
     sf::Vector2f textureViewEndPosition;
-    int textureViewWidth;
-    int textureViewHeight;
+    int textureViewWidth;                   // Width of the area where blocks can be placed
+    int textureViewHeight;                  // Height of the area where blocks cen be placed
 
-    const int textureViewCount = 10;
-    int textureViewMargin = 5;
+    const int textureViewCount = 10;        // How many textures in the view by default
+    int textureViewMargin = 5;              // View area margin.
 
-    float blockWidthInView;
-    float blockHeightInView;
-    int firstTextureToShow = 1;
+    float blockWidthInView;                 // Block width in the view
+    float blockHeightInView;                // Block height in the view
+    int firstTextureToShow = 1;             // Position where list begins
+                                            // This value is overwritten in the init
 
-    std::vector <BlockTexture> textures;
+    std::vector <BlockTexture> textures;    // Keeps all visible blocks
     class Resources *res;
 
-    float outlineSize = 1.0f;
-    sf::RectangleShape blockOutline; // Block borders
+    sf::RectangleShape blockOutline; // Box that contains block
+    float outlineSize = 1.0f;        // Size of box outlines
 
 };
 
@@ -170,7 +184,8 @@ public:
     std::string getBuffer() { return buffer; }
     void setBuffer(std::string str) { buffer = str; setVisibleString( buffer ); }
     void setVisibleString(std::string);
-private:
+
+protected:
     std::string buffer;
     
     sf::RectangleShape componentBackground;
@@ -186,7 +201,7 @@ public:
 
     enum MESSAGE_BOX_TYPE { MSG_OK, MSG_OK_CANCEL, MSG_CUSTOM };
 
-private:
+protected:
     std::string title;
 
     int type;

@@ -178,7 +178,8 @@ void Map::draw(sf::RenderWindow& window, sf::View& camera, class Resources *res)
         sprite.setRotation(block->angle);
 */
         sprite.setTexture(*res->getTexture(block->id));
-        sprite.setOrigin(sprite.getTexture()->getSize().x/2.0f, sprite.getTexture()->getSize().y/2.0f);
+//        sprite.setOrigin(sprite.getTexture()->getSize().x/2.0f, sprite.getTexture()->getSize().y/2.0f);
+        sprite.setOrigin(sprite.getLocalBounds().width/2.0f, sprite.getLocalBounds().height/2.0f);
         sprite.setPosition(block->x, block->y);
         sprite.setRotation(block->angle);
         window.draw(sprite);
@@ -207,7 +208,7 @@ int Map::getGridY(int y)
     return y/gridSize;
 }
 
-void Map::addBlock(int blockX, int blockY, float blockAngle, int blockID)
+void Map::addBlock(float blockX, float blockY, float blockAngle, int blockID)
 {
     if ( blockID == -1 )
         return;

@@ -10,6 +10,8 @@
 const int screenW = 1920;
 const int screenH = 1080;
 
+const float TextShownTime = 3.0f;
+
 const float toolAreaHeight = 0.1f;
 const float toolAreaWidth  = 0.9f;
 
@@ -66,6 +68,8 @@ int main( int argc, char **argv )
     UI myUI;
     sf::RenderWindow window(sf::VideoMode(screenW, screenH), "Window");
     sf::View camera;
+    sf::Sprite selectedBlockSprite;
+    sf::Text text;
 
     camera.setSize(screenW, screenH);
     camera.setCenter(screenW/2, screenH/2);
@@ -77,23 +81,38 @@ int main( int argc, char **argv )
     int cameraMaxX = myMap.getWidth() - camera.getSize().x/2;
     int cameraMaxY = myMap.getHeight() - camera.getSize().y/2;
 
-
+    std::cout << "Loading blocks." << std::endl; 
     myResources.loadBlocks("blocks");
 
+    std::cout << "Loading fonts" << std::endl; 
     if ( !myResources.loadFont("AkaashNormal.ttf") )
         std::cout << "Can't load font!" << std::endl;
 
     sf::RectangleShape viewOutlines;
     sf::IntRect viewArea;
-
+   
+    std::cout << "Initializing." << std::endl; 
     init( viewOutlines, viewArea, myUI, camera, &myResources);
+    int oldTexture = -1;
+    
+    // Font
+    text.setFont(*myResources.getFont(0));
+    text.setCharacterSize(12);
+    float textTimeInScreen = 0.0f;
+    
     sf::Clock myClock;
     while(window.isOpen())
     {
         float deltaTime = myClock.restart().asSeconds();
         sf::Vector2i mousePos = sf::Mouse::getPosition(window);
         sf::Event event;
-        
+
+        if ( oldTexture != myUI.getSelectedBlock() )
+        {
+            oldTexture = myUI.getSelectedBlock();
+            selectedBlockSprite.setTexture(*myResources.getTexture(myUI.getSelectedBlock()), true);
+        }
+
         while(window.pollEvent(event))
         {
             Event myEvent;
@@ -134,29 +153,28 @@ int main( int argc, char **argv )
         camera.move({-1, 0});
         if(camera.getCenter().x < cameraMinX)
             camera.setCenter(cameraMinX, camera.getCenter().y);
-
-        std::cout << "Camera: " << camera.getCenter().x << " x " << camera.getCenter().y << std::endl; 
+        textTimeInScreen = TextShownTime;
     }
     if ( sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
     {
         camera.move({1, 0});
         if(camera.getCenter().x > cameraMaxX)
             camera.setCenter(cameraMaxX, camera.getCenter().y);
-        std::cout << "Camera: " << camera.getCenter().x << " x " << camera.getCenter().y << std::endl; 
+        textTimeInScreen = TextShownTime;
     }
     if ( sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
     {
         camera.move({0, -1});
         if(camera.getCenter().y < cameraMinY)
             camera.setCenter(camera.getCenter().x, cameraMinY);
-        std::cout << "Camera: " << camera.getCenter().x << " x " << camera.getCenter().y << std::endl; 
+        textTimeInScreen = TextShownTime;
     }
     if ( sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
     {
         camera.move({0, 1});
         if(camera.getCenter().y > cameraMaxY)
             camera.setCenter(camera.getCenter().x, cameraMaxY);
-        std::cout << "Camera: " << camera.getCenter().x << " x " << camera.getCenter().y << std::endl; 
+        textTimeInScreen = TextShownTime;
     }
 
     if( sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
@@ -166,9 +184,10 @@ int main( int argc, char **argv )
             if ( inRect(mousePos, viewArea) )
             {
                 sf::Vector2f pos = window.mapPixelToCoords(mousePos, camera);
-                int x = pos.x;
-                int y = pos.y;
-                myMap.addBlock(x, y, 0.0f, myUI.getBlockID());
+                myMap.addBlock(pos.x, pos.y, 0.0f, myUI.getSelectedBlock());
+
+                std::cout << "Mouse: " << mousePos.x << "x" << mousePos.y << std::endl;
+                std::cout << "Map: " << pos.x << "x" << pos.y << std::endl;
             }
             release = false;
         }
@@ -183,6 +202,41 @@ int main( int argc, char **argv )
     window.draw(viewOutlines);
 
     myUI.draw(&myResources, window);
+    
+    if ( inRect(mousePos, viewArea) )
+    {
+
+        selectedBlockSprite.setOrigin(selectedBlockSprite.getLocalBounds().width/2.0f, selectedBlockSprite.getLocalBounds().height/2.0f);
+        selectedBlockSprite.setColor(sf::Color(255, 255, 255, 128));
+        sf::Vector2f pos = window.mapPixelToCoords(mousePos, camera);
+        selectedBlockSprite.setPosition(pos);
+        window.setView(camera);
+        window.draw(selectedBlockSprite);
+        window.setView(window.getDefaultView());
+    }
+
+    std::cout << textTimeInScreen << std::endl;
+    if ( textTimeInScreen > 0.0f )
+    {
+        std::string str;
+        text.setPosition(10.0f, 10.0f);
+        text.setFillColor(sf::Color::White);
+        str = "X: ";
+        str += std::to_string((int)(camera.getCenter().x-camera.getSize().x/2.0f)) + " / " ;
+        str += std::to_string((int)(myMap.getWidth()-camera.getSize().x)) + "\n";
+
+        str += "Y: ";
+        str += std::to_string((int)(camera.getCenter().y-camera.getSize().y/2.0f)) + " / "; 
+        str += std::to_string((int)(myMap.getHeight()-camera.getSize().y));
+        
+        if ( textTimeInScreen <= 1.0f)
+            text.setFillColor(sf::Color(255,255,255, 255*textTimeInScreen));
+
+        text.setString(str);
+        window.draw(text);
+
+        textTimeInScreen -= deltaTime;
+    }
 
     window.display();
     }

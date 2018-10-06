@@ -173,7 +173,7 @@ void BlockSelectList::init(class Resources *res)
     textures.resize(textureViewCount);
 
     firstTextureToShow = res->getMinTextureKey();
-    selectedBlock = firstTextureToShow;
+    setSelectedBlock(firstTextureToShow);
     updateTextures();    
 }
 
@@ -297,7 +297,7 @@ bool BlockSelectList::processEvent(class Event *event)
                     if ( textures[index].texture )
                     {
                         event->ui->setBlockID(textures[index].ID);
-                        selectedBlock = textures[index].ID;
+                        setSelectedBlock(textures[index].ID);
                     }
                      
            }

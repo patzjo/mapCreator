@@ -14,8 +14,8 @@
     int [Block count]
 
     [ block data
-        - int x
-        - int y
+        - float x
+        - float y
         - float angle
         - int id
     ] * Block count
@@ -27,7 +27,7 @@ const int defaultGridSize = 500;
 
 struct Block
 {
-    int x, y;
+    float x, y;
     float angle;
 
     int id;
@@ -50,7 +50,7 @@ public:
     bool loadMap(std::string filename);
 
     void draw(sf::RenderWindow& window, sf::View& camera, class Resources *res);
-    void addBlock(int blockX, int blockY, float blockAngle, int blockID);
+    void addBlock(float blockX, float blockY, float blockAngle, int blockID);
 
     int getGridNumber(int x, int y);
     inline int getGridX(int x);
