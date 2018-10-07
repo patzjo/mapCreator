@@ -22,9 +22,13 @@ public:
     bool isActive() { return active; }
     bool isActiveOrHiding() { return (active || hideAnimation); }
 
-    void addCommand(std::string commandName, std::function<void(std::string)> func);
-
-    void helpCommand(std::string args);
+    void addCommand(std::string commandName, std::function<void(std::vector <std::string>)> func);
+// Commands
+    void helpCommand(std::vector <std::string> args);
+    void newCommand(std::vector <std::string> args);
+    void loadCommand(std::vector <std::string> args);
+    
+    std::vector <std::string>getArgs(std::string);
 
 private:
     sf::RectangleShape background;
@@ -54,5 +58,5 @@ private:
     float blinkyTime = 0.3f;
     bool blink = true;
 
-    std::map <std::string, std::function<void(std::string)>>commands;
+    std::map <std::string, std::function<void(std::vector <std::string>)>>commands;
 };

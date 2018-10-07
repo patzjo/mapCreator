@@ -1,6 +1,13 @@
 #include "Console.hpp"
 #include "Resources.hpp"
 #include <functional>
+#include <algorithm>
+#include <filesystem>
+
+#include "Map.hpp"
+
+namespace fs = std::filesystem;
+
 
 void Console::init(class Resources *res)
 {
@@ -19,7 +26,6 @@ void Console::init(class Resources *res)
     commandBufferText.setFont(*res->getFont(0));
     commandBufferText.setFillColor(sf::Color::White);
     commandBufferText.setCharacterSize(20.0f);
-    commandBufferText.setString("W");
 
     cursor.setSize({2.0f, 17.0f});
     cursor.setFillColor(sf::Color::White);
@@ -27,8 +33,9 @@ void Console::init(class Resources *res)
     logAreaHeight = background.getSize().y - 30.0f;
     logLineCount = (int)(logAreaHeight/logBufferText.getCharacterSize()+0.5f);
 
-    auto fp = std::bind(&Console::helpCommand, this, std::placeholders::_1);
-    addCommand("help", fp);    
+    addCommand("help", std::bind(&Console::helpCommand, this, std::placeholders::_1));    
+    addCommand("new", std::bind(&Console::newCommand, this, std::placeholders::_1));    
+    addCommand("load", std::bind(&Console::loadCommand, this, std::placeholders::_1));    
 }
 
 void Console::updateLogBufferPosition()
@@ -36,7 +43,7 @@ void Console::updateLogBufferPosition()
     int position = logBuffer.size() - logLineCount;
     if ( position < 0 )
         position = 0;
-    
+
     logBufferPosition = position;    
 }
 
@@ -146,8 +153,11 @@ void Console::addInput(int character)
     {
         if ( character == 13) // Enter
         {
-            execute(commandBuffer);
-            commandBuffer.clear();
+            if ( !commandBuffer.empty() )
+            {
+                execute(commandBuffer);
+                commandBuffer.clear();
+            }
         } else if ( character == 8) // Backspace
         {
             if ( !commandBuffer.empty() )
@@ -167,7 +177,7 @@ void Console::addInput(int character)
     blink = true;
 }
 
-void Console::addCommand(std::string commandName, std::function<void(std::string)> func)
+void Console::addCommand(std::string commandName, std::function<void(std::vector <std::string>)> func)
 {
     std::transform(commandName.begin(), commandName.end(), commandName.begin(), ::tolower);
     commands[commandName] = func;
@@ -186,14 +196,74 @@ void Console::execute(std::string command)
     }
     else
     {
-        commands[onlyCommand](command);
+        commands[onlyCommand](getArgs(command));
     }
 
 }
 
-void Console::helpCommand(std::string args)
+std::vector <std::string>Console::getArgs(std::string str)
+{
+    std::vector <std::string> result;
+    std::string arg;
+    std::stringstream ss(str);
+    
+    while(ss >> arg)
+        result.push_back(arg);
+
+    return result;
+}
+
+void Console::helpCommand(std::vector <std::string> args)
 {
     addLogLine("Help");
-    addLogLine("\tCommand\t\tArguments\t\tDescription");
-    addLogLine("\thelp\t\t-\t\tThis help");
+    addLogLine("\tCommand\t\tArguments\t\t\t\t\t\tDescription");
+    addLogLine("\t   help\t\t-\t\tThis help");
+    addLogLine("\t   new\t\t[width] [height]\t\tCreates new map");
+}
+
+void Console::newCommand(std::vector <std::string> args)
+{
+    if ( args.size() != 3 )
+    {
+        addLogLine("\tError: Too few parameters! (new [width] [height])");
+    }
+    else
+    {
+        addLogLine("\tEnought parameters!");
+    }
+}
+
+void Console::loadCommand(std::vector <std::string> args)
+{
+    if (args.size() == 2)
+    {
+        bool returnCode = false;
+        if ( args[1].find(".map") == std::string::npos )
+            returnCode = resources->getMap()->loadMap(args[1] + ".map");
+        else
+            returnCode = resources->getMap()->loadMap(args[1]);
+        
+        if ( !returnCode )
+        {
+            addLogLine("\tCan't open mapfile. Check your spelling.");
+        }
+        else
+            addLogLine("\tMap loaded.");
+
+    } else
+    {
+        addLogLine("\tWrong number of arguments.");
+        addLogLine("All maps that you can load:");
+        for(auto& p: fs::directory_iterator("."))
+        {
+            fs::path path = p;
+            if ( path.extension().string() == ".map" )
+            {
+                addLogLine("\t-> " + path.filename().string());
+            }
+            
+        }
+        
+    }
+
 }

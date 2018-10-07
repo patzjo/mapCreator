@@ -58,6 +58,9 @@ public:
     void setConsole(class Console *activeConsole) { console = activeConsole; }
     class Console *getConsole() { return console; }
 
+    void setMap(class Map *mapp) { map = mapp; }
+    class Map *getMap() { return map; }
+
 private:
     std::map <int, sf::Texture *> blockTextures;
     std::vector <sf::Font *> fonts;
@@ -66,4 +69,5 @@ private:
     int windowHeight = 0;
 
     class Console *console;
+    class Map *map;
 };

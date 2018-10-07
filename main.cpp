@@ -76,7 +76,8 @@ int main( int argc, char **argv )
     myResources.setWindowWidth(screenW);
     myResources.setWindowHeight(screenH);
     myResources.setConsole(&myConsole);
- 
+    myResources.setMap(&myMap);
+
     myMap.init(&myResources);
     camera.setSize(screenW, screenH);
     camera.setCenter(screenW/2, screenH/2);
