@@ -1,8 +1,6 @@
 #include "Console.hpp"
 #include "Resources.hpp"
-
-
-
+#include <functional>
 
 void Console::init(class Resources *res)
 {
@@ -28,6 +26,9 @@ void Console::init(class Resources *res)
     
     logAreaHeight = background.getSize().y - 30.0f;
     logLineCount = (int)(logAreaHeight/logBufferText.getCharacterSize()+0.5f);
+
+    auto fp = std::bind(&Console::helpCommand, this, std::placeholders::_1);
+    addCommand("help", fp);    
 }
 
 void Console::updateLogBufferPosition()
@@ -166,13 +167,33 @@ void Console::addInput(int character)
     blink = true;
 }
 
+void Console::addCommand(std::string commandName, std::function<void(std::string)> func)
+{
+    std::transform(commandName.begin(), commandName.end(), commandName.begin(), ::tolower);
+    commands[commandName] = func;
+}
+
 
 void Console::execute(std::string command)
 {
     addLogLine("Executing: '" + commandBuffer + "'");
-    
-    
+    std::string onlyCommand = command.substr(0, command.find_first_of(' '));
+    std::transform(onlyCommand.begin(), onlyCommand.end(), onlyCommand.begin(), ::tolower);
 
-    
+    if ( commands.find(onlyCommand) == commands.end() )
+    {
+        addLogLine("\tCommand not found!");
+    }
+    else
+    {
+        commands[onlyCommand](command);
+    }
 
+}
+
+void Console::helpCommand(std::string args)
+{
+    addLogLine("Help");
+    addLogLine("\tCommand\t\tArguments\t\tDescription");
+    addLogLine("\thelp\t\t-\t\tThis help");
 }

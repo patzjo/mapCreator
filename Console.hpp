@@ -1,10 +1,13 @@
 #pragma once
 
 #include <SFML/Graphics.hpp>
+#include <functional>
+
 
 class Console
 {
 public:
+    typedef void (Console::*CommandFunction)(std::string);
     void init(class Resources *res);
     void draw(sf::RenderWindow& window);
     void update(float deltaTime);
@@ -18,6 +21,10 @@ public:
 
     bool isActive() { return active; }
     bool isActiveOrHiding() { return (active || hideAnimation); }
+
+    void addCommand(std::string commandName, std::function<void(std::string)> func);
+
+    void helpCommand(std::string args);
 
 private:
     sf::RectangleShape background;
@@ -46,4 +53,6 @@ private:
     float blinkyCurrentTime = 0.0f;
     float blinkyTime = 0.3f;
     bool blink = true;
+
+    std::map <std::string, std::function<void(std::string)>>commands;
 };
