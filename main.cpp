@@ -5,6 +5,7 @@
 #include "Resources.hpp"
 #include "Map.hpp"
 #include "UI.hpp"
+#include "Console.hpp"
 #include "Utils.hpp"
 
 const int screenW = 1920;
@@ -15,9 +16,9 @@ const float TextShownTime = 3.0f;
 const float toolAreaHeight = 0.1f;
 const float toolAreaWidth  = 0.9f;
 
-const std::string defaultFilename = "DefaultMapName";
-const std::string defaultAuthor   = "DefaultAuthor";
-const std::string defaultDescription = "MapTitle";
+const std::string defaultFilename       = "DefaultMapName";
+const std::string defaultAuthor         = "DefaultAuthor";
+const std::string defaultDescription    = "MapTitle";
 
 void init(sf::RectangleShape& viewOutlines, sf::IntRect& viewArea, UI& ui, sf::View& camera, class Resources *res)
 {
@@ -66,11 +67,17 @@ int main( int argc, char **argv )
     Resources myResources;
     Map myMap;
     UI myUI;
+    Console myConsole;
     sf::RenderWindow window(sf::VideoMode(screenW, screenH), "Window");
     sf::View camera;
     sf::Sprite selectedBlockSprite;
     sf::Text text;
 
+    myResources.setWindowWidth(screenW);
+    myResources.setWindowHeight(screenH);
+    myResources.setConsole(&myConsole);
+ 
+    myMap.init(&myResources);
     camera.setSize(screenW, screenH);
     camera.setCenter(screenW/2, screenH/2);
     myMap.createNew("mapFile.map", 10000, 10000, "Map", "TeamGG");
@@ -81,20 +88,28 @@ int main( int argc, char **argv )
     int cameraMaxX = myMap.getWidth() - camera.getSize().x/2;
     int cameraMaxY = myMap.getHeight() - camera.getSize().y/2;
 
-    std::cout << "Loading blocks." << std::endl; 
     myResources.loadBlocks("blocks");
 
-    std::cout << "Loading fonts" << std::endl; 
+//    std::cout << "Loading fonts" << std::endl; 
+    myConsole.addLogLine("Loading fonts");
     if ( !myResources.loadFont("AkaashNormal.ttf") )
+    {
         std::cout << "Can't load font!" << std::endl;
+    }
 
     sf::RectangleShape viewOutlines;
     sf::IntRect viewArea;
    
-    std::cout << "Initializing." << std::endl; 
+    myConsole.addLogLine("Setting up the console.");
+//    std::cout << "Setting up console." << std::endl;
+    myConsole.init(&myResources);
+
+//    std::cout << "Initializing." << std::endl; 
+    myConsole.addLogLine("Initializing.");
     init( viewOutlines, viewArea, myUI, camera, &myResources);
     int oldTexture = -1;
     
+
     // Font
     text.setFont(*myResources.getFont(0));
     text.setCharacterSize(12);
@@ -113,18 +128,19 @@ int main( int argc, char **argv )
             selectedBlockSprite.setTexture(*myResources.getTexture(myUI.getSelectedBlock()), true);
         }
 
+/********************************** EVENTS ***********************************/
+
         while(window.pollEvent(event))
         {
             Event myEvent;
-            if ( event.type == sf::Event::Closed )
-            {
-                window.close();
-            } else if( event.type == sf::Event::KeyReleased && !myUI.isComponentFocused())
+
+            if( event.type == sf::Event::KeyReleased && !myUI.isComponentFocused() && !myConsole.isActive())
             {
                 switch(event.key.code)
                 {
                     case sf::Keyboard::Key::Escape:
-                        window.close();
+                            if ( !myConsole.isActiveOrHiding() )
+                                window.close();
                     break;
 
                     case sf::Keyboard::Key::F1:
@@ -155,8 +171,20 @@ int main( int argc, char **argv )
                     }
                     break;
 
+                    case sf::Keyboard::Key::Enter:
+                    {
+                        if ( !myConsole.isActive() )
+                            myConsole.show();
+                    }
+                    break;
+
                     default: break;
                 }
+            } 
+
+            if ( event.type == sf::Event::Closed )
+            {
+                window.close();
             } else if ( event.type == sf::Event::MouseButtonPressed )
             {
                 MouseClickEventData mouseClickEventData({event.mouseButton.x, event.mouseButton.y}, 
@@ -171,38 +199,46 @@ int main( int argc, char **argv )
                 myUI.createEvent(myEvent, MOUSE_CLICK_EVENT, (void*)&mouseClickEventData, &myResources);
             } else if (event.type == sf::Event::TextEntered)
             {
-                
-                myUI.createEvent(myEvent, TEXT_ENTERED_EVENT, (void *)&event.text.unicode);
+                if ( myConsole.isActive() )
+                    myConsole.addInput(event.text.unicode);
+                else
+                    myUI.createEvent(myEvent, TEXT_ENTERED_EVENT, (void *)&event.text.unicode);
             }
+            
 
         }
-    if ( sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+
+/********************************** MOVEMENT ***********************************/
+    if ( !myUI.isComponentFocused() && !myConsole.isActive() )
     {
-        camera.move({-1, 0});
-        if(camera.getCenter().x < cameraMinX)
-            camera.setCenter(cameraMinX, camera.getCenter().y);
-        textTimeInScreen = TextShownTime;
-    }
-    if ( sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-    {
-        camera.move({1, 0});
-        if(camera.getCenter().x > cameraMaxX)
-            camera.setCenter(cameraMaxX, camera.getCenter().y);
-        textTimeInScreen = TextShownTime;
-    }
-    if ( sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-    {
-        camera.move({0, -1});
-        if(camera.getCenter().y < cameraMinY)
-            camera.setCenter(camera.getCenter().x, cameraMinY);
-        textTimeInScreen = TextShownTime;
-    }
-    if ( sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-    {
-        camera.move({0, 1});
-        if(camera.getCenter().y > cameraMaxY)
-            camera.setCenter(camera.getCenter().x, cameraMaxY);
-        textTimeInScreen = TextShownTime;
+        if ( sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+        {
+            camera.move({-1, 0});
+            if(camera.getCenter().x < cameraMinX)
+                camera.setCenter(cameraMinX, camera.getCenter().y);
+            textTimeInScreen = TextShownTime;
+        }
+        if ( sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+        {
+            camera.move({1, 0});
+            if(camera.getCenter().x > cameraMaxX)
+                camera.setCenter(cameraMaxX, camera.getCenter().y);
+            textTimeInScreen = TextShownTime;
+        }
+        if ( sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+        {
+            camera.move({0, -1});
+            if(camera.getCenter().y < cameraMinY)
+                camera.setCenter(camera.getCenter().x, cameraMinY);
+            textTimeInScreen = TextShownTime;
+        }
+        if ( sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+        {
+            camera.move({0, 1});
+            if(camera.getCenter().y > cameraMaxY)
+                camera.setCenter(camera.getCenter().x, cameraMaxY);
+            textTimeInScreen = TextShownTime;
+        }
     }
 
     if( sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
@@ -223,14 +259,20 @@ int main( int argc, char **argv )
     else
         release = true;
 
+/********************************** UPDATE ***********************************/
+
     window.clear();
     
     myUI.update();
-    myMap.draw(window, camera, &myResources);
+    myConsole.update(deltaTime);
+
+/*********************************** DRAW ************************************/
+    myMap.draw(window, camera);
     window.draw(viewOutlines);
 
     myUI.draw(&myResources, window);
     
+/********************* DRAW SELECTED BLOCK AT MOUSE POSITION *****************/
     if ( inRect(mousePos, viewArea) )
     {
 
@@ -243,6 +285,7 @@ int main( int argc, char **argv )
         window.setView(window.getDefaultView());
     }
 
+/************************** DRAW CAMERA POSITION TEXT ************************/
     if ( textTimeInScreen > 0.0f )
     {
         std::string str;
@@ -264,6 +307,8 @@ int main( int argc, char **argv )
 
         textTimeInScreen -= deltaTime;
     }
+
+    myConsole.draw(window);
 
     window.display();
     }

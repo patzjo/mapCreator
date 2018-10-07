@@ -34,7 +34,7 @@ bool Map::saveMap()
         mapFile.write(&nameLength,                      1); // Name length
         mapFile.write(&authorLength,                    1); // Author name length
 
-        mapFile.write(info.name.c_str(),                nameLength);    // Name
+        mapFile.write(info.name.c_str(),                nameLength);    // Map name
         mapFile.write(info.author.c_str(),              authorLength);  // Author name
 
         mapFile.write((const char *)&blockCount,        4); // Block count
@@ -169,7 +169,7 @@ std::vector <Block *> Map::getBlocksOnCamera(sf::View& camera)
 }
 
 
-void Map::draw(sf::RenderWindow& window, sf::View& camera, class Resources *res)
+void Map::draw(sf::RenderWindow& window, sf::View& camera)
 {
     if ( !mapReady )
         return;
@@ -179,14 +179,7 @@ void Map::draw(sf::RenderWindow& window, sf::View& camera, class Resources *res)
     for ( auto *block : getBlocksOnCamera(camera) )
     {
         sf::Sprite sprite;
-/*
         sprite.setTexture(*res->getTexture(block->id));
-        sprite.setOrigin(sprite.getTextureRect().width/2, sprite.getTextureRect().height/2);
-        sprite.setPosition(block->x, block->y);
-        sprite.setRotation(block->angle);
-*/
-        sprite.setTexture(*res->getTexture(block->id));
-//        sprite.setOrigin(sprite.getTexture()->getSize().x/2.0f, sprite.getTexture()->getSize().y/2.0f);
         sprite.setOrigin(sprite.getLocalBounds().width/2.0f, sprite.getLocalBounds().height/2.0f);
         sprite.setPosition(block->x, block->y);
         sprite.setRotation(block->angle);

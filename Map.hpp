@@ -49,8 +49,9 @@ public:
     bool saveMap();
     bool loadMap(std::string filename);
 
-    void draw(sf::RenderWindow& window, sf::View& camera, class Resources *res);
+    void draw(sf::RenderWindow& window, sf::View& camera);
     void addBlock(float blockX, float blockY, float blockAngle, int blockID);
+    void init(class Resources *resources) { res = resources; }
 
     int getGridNumber(int x, int y);
     inline int getGridX(int x);
@@ -86,4 +87,6 @@ private:
     bool mapReady = false;
 
     bool saved = false;
+
+    class Resources *res;
 };

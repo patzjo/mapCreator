@@ -339,8 +339,6 @@ void EditBox::init(class Resources *res)
     text.setFont(*res->getFont(0));
     text.setCharacterSize(getArea().height*0.80f);
     text.setFillColor(sf::Color::White);
-//    text.setOutlineColor(sf::Color::White);
-//    text.setOutlineThickness(1.5f);
     text.setPosition({(float)getArea().left+4.0f, (float)getArea().top-4});
 }
 
@@ -382,7 +380,7 @@ bool EditBox::processEvent(class Event *event)
     return true;
 }
 
-// Return true if we want to remove focus from component
+// Return true if we want to remove focus from the component
 bool EditBox::addCharacter(int character)
 {
 
@@ -409,7 +407,7 @@ bool EditBox::addCharacter(int character)
 
     return false;
 }
-
+// Calculates end of string that does not overlap editbox
 void EditBox::setVisibleString(std::string str)
 {
     std::string anotherString;

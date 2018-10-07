@@ -1,4 +1,5 @@
 #include "Resources.hpp"
+#include "Console.hpp"
 
 Resources::~Resources()
 {
@@ -62,9 +63,11 @@ int Resources::getPrevKeyFromTexture(int id)
 
 void Resources::loadBlocks(std::string directory)
 {
-     std::cout << "Loading blocks..." << std::endl;
+    console->addLogLine("Loading blocks...");
+//    std::cout << "Loading blocks..." << std::endl;
     for(auto& p : fs::directory_iterator(directory) )
     {
+        std::string str;
         sf::Texture *texture = nullptr;
         fs::path path;
         std::string pathAndFilename;
@@ -80,11 +83,17 @@ void Resources::loadBlocks(std::string directory)
         id = filename.substr(0, idPositionEnd);
         name = filename.substr(idPositionEnd+1, filename.find_last_of('.')-(idPositionEnd+1));
 
-        std::cout << "\t" << id << "\t= " << pathAndFilename << std::endl;
+        str = "\t";
+        str += id + "\t = ";
+        str += pathAndFilename;
+//        std::cout << "\t" << id << "\t= " << pathAndFilename << std::endl;
+        console->addLogLine(str);
+
         texture = new sf::Texture();
         texture->loadFromFile(pathAndFilename);
         blockTextures.emplace(stoi(id), texture);
     }
+    console->addLogLine("Block loading is done.");
 }
 
 bool Resources::loadFont(std::string filename)

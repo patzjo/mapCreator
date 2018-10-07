@@ -8,6 +8,7 @@ set(MY_FILES
     Map.cpp
     UI.cpp
     Resources.cpp
+    Console.cpp
 )
 
 add_executable(${EXECUTABLE_NAME} ${MY_FILES})
