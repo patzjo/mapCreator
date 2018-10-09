@@ -20,6 +20,11 @@ const std::string defaultFilename       = "DefaultMapName";
 const std::string defaultAuthor         = "DefaultAuthor";
 const std::string defaultDescription    = "MapTitle";
 
+float getMin(float v1, float v2)
+{
+    return v1<v2?v1:v2;
+}
+
 void init(sf::RectangleShape& viewOutlines, sf::IntRect& viewArea, UI& ui, sf::View& camera, class Resources *res)
 {
     viewOutlines.setFillColor(sf::Color::Transparent);
@@ -83,12 +88,6 @@ int main( int argc, char **argv )
     camera.setCenter(screenW/2, screenH/2);
     myMap.createNew("mapFile.map", 10000, 10000, "Map", "TeamGG");
 
-    int cameraMinX = camera.getCenter().x;
-    int cameraMinY = camera.getCenter().y;
-
-    int cameraMaxX = myMap.getWidth() - camera.getSize().x/2;
-    int cameraMaxY = myMap.getHeight() - camera.getSize().y/2;
-
     myResources.loadBlocks("blocks");
 
 //    std::cout << "Loading fonts" << std::endl; 
@@ -115,7 +114,8 @@ int main( int argc, char **argv )
     text.setFont(*myResources.getFont(0));
     text.setCharacterSize(12);
     float textTimeInScreen = 0.0f;
-    
+
+
     sf::Clock myClock;
     while(window.isOpen())
     {
@@ -212,44 +212,78 @@ int main( int argc, char **argv )
 /********************************** MOVEMENT ***********************************/
     if ( !myUI.isComponentFocused() && !myConsole.isActive() )
     {
+        
+
         if ( sf::Keyboard::isKeyPressed(sf::Keyboard::A))
         {
             camera.move({-1, 0});
-            if(camera.getCenter().x < cameraMinX)
-                camera.setCenter(cameraMinX, camera.getCenter().y);
             textTimeInScreen = TextShownTime;
         }
         if ( sf::Keyboard::isKeyPressed(sf::Keyboard::D))
         {
             camera.move({1, 0});
-            if(camera.getCenter().x > cameraMaxX)
-                camera.setCenter(cameraMaxX, camera.getCenter().y);
             textTimeInScreen = TextShownTime;
         }
         if ( sf::Keyboard::isKeyPressed(sf::Keyboard::W))
         {
             camera.move({0, -1});
-            if(camera.getCenter().y < cameraMinY)
-                camera.setCenter(camera.getCenter().x, cameraMinY);
             textTimeInScreen = TextShownTime;
         }
         if ( sf::Keyboard::isKeyPressed(sf::Keyboard::S))
         {
             camera.move({0, 1});
-            if(camera.getCenter().y > cameraMaxY)
-                camera.setCenter(camera.getCenter().x, cameraMaxY);
             textTimeInScreen = TextShownTime;
         }
 
+        float zoomSpeed = 10.0f * deltaTime;
+
         if ( sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Add))
         {
-
+            camera.setSize({camera.getSize().x * (1.0f - zoomSpeed), 
+                            camera.getSize().y * (1.0f - zoomSpeed)});
         }
 
         if ( sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Subtract))
         {
-            
+            camera.setSize({camera.getSize().x * (1.0f + zoomSpeed), 
+                            camera.getSize().y * (1.0f + zoomSpeed)});
         }
+       
+        int smallestAspectFactor = (int)getMin(myMap.getWidth()/screenW, myMap.getHeight()/screenH);
+        
+        int cameraMinX = 0; 
+        int cameraMaxX = 0;
+        int cameraMinY = 0;
+        int cameraMaxY = 0;
+
+        if ( camera.getSize().x > myMap.getWidth() || 
+             camera.getSize().y > myMap.getHeight())
+        {
+            cameraMinX = myMap.getWidth()/2.0f;
+            cameraMaxX = myMap.getHeight()/2.0f;
+
+            camera.setSize({(float)smallestAspectFactor*screenW, (float)smallestAspectFactor*screenH});
+        }
+        else
+        {
+            cameraMinX = camera.getSize().x/2.0f;
+            cameraMaxX = myMap.getWidth() - camera.getSize().x/2;
+            cameraMinY = camera.getSize().y/2.0f;
+            cameraMaxY = myMap.getHeight() - camera.getSize().y/2;
+        }
+
+        if(camera.getCenter().x < cameraMinX)
+            camera.setCenter(cameraMinX, camera.getCenter().y);
+        
+        if(camera.getCenter().x > cameraMaxX)
+            camera.setCenter(cameraMaxX, camera.getCenter().y);
+        
+        if(camera.getCenter().y < cameraMinY)
+            camera.setCenter(camera.getCenter().x, cameraMinY);
+        
+        if(camera.getCenter().y > cameraMaxY)
+            camera.setCenter(camera.getCenter().x, cameraMaxY);
+
         
     }
 
