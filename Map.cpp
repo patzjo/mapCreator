@@ -5,10 +5,15 @@
 #include <filesystem>
 #include <string>
 #include <cstring>
+#include <cmath>
+
+#include "Utils.hpp"
+#include "Console.hpp"
 
 namespace fs = std::filesystem;
 
 const int mapID = 0x2150614D;
+const float PI = 3.14159265359f;
 
 Map::~Map()
 {
@@ -198,6 +203,10 @@ void Map::draw(sf::RenderWindow& window, sf::View& camera)
         sprite.setOrigin(sprite.getLocalBounds().width/2.0f, sprite.getLocalBounds().height/2.0f);
         sprite.setPosition(block->x, block->y);
         sprite.setRotation(block->angle);
+        
+        if (block == selectedBlock)
+            sprite.setColor(sf::Color::Red);
+        
         window.draw(sprite);
     }
 
@@ -253,3 +262,50 @@ void Map::createNew(std::string filename, int width, int height, std::string nam
     mapReady = true;
 }
 
+void Map::selectBlockUnderMouse(sf::Vector2f& mousePos, sf::View& camera)
+{
+    for ( auto *block : getBlocksOnCamera(camera) )
+    {
+        sf::Sprite sprite(*res->getTexture(block->id));
+
+        sprite.setOrigin(sprite.getTexture()->getSize().x/2.0f, 
+                         sprite.getTexture()->getSize().y/2.0f);
+        sprite.setPosition(block->x, block->y);
+        sprite.rotate(block->angle);
+        
+        if ( sprite.getGlobalBounds().contains(mousePos) )
+        {
+            selectedBlock = block;
+            break;
+        }
+
+    }
+}
+
+void Map::removeBlock(Block *block)
+{
+    if ( block == nullptr )
+        return;
+
+
+    for ( auto it = blocks.begin(); it != blocks.end(); it++ )
+    {
+        if ( *it == block )
+        {
+            it = blocks.erase(it);
+            break;
+        }
+    }
+
+    std::vector <Block *> *gridBlocks = &blockGrid[getGridNumber(block->x, block->y)];
+    for ( auto it = gridBlocks->begin(); it != gridBlocks->end(); it++ )
+    {
+        if ( *it == block )
+        {
+            it = gridBlocks->erase(it);
+            break;
+        }
+    }
+
+    delete block;
+}

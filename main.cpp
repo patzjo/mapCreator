@@ -92,7 +92,7 @@ int main( int argc, char **argv )
     myMap.init(&myResources);
     camera.setSize(screenW, screenH);
     camera.setCenter(screenW/2, screenH/2);
-//    myMap.createNew("mapFile.map", 10000, 10000, "Map", "TeamGG");
+    myMap.createNew("mapFile.map", 10000, 10000, "Map", "TeamGG");
 
     myResources.loadBlocks("blocks");
 
@@ -126,6 +126,8 @@ int main( int argc, char **argv )
     {
         float deltaTime = myClock.restart().asSeconds();
         sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+        sf::Vector2f mousePosMap = window.mapPixelToCoords(mousePos, camera);
+
         sf::Event event;
 
         if ( oldTexture != myUI.getSelectedBlock() )
@@ -184,6 +186,15 @@ int main( int argc, char **argv )
                     }
                     break;
 
+                    case sf::Keyboard::Key::Delete:
+                    {
+                        if ( myMap.getSelectedBlock() != nullptr )
+                        {
+                            myMap.removeBlock(myMap.getSelectedBlock());
+                            myMap.unselect();
+                        }
+                    }
+                    break;
                     default: break;
                 }
             } 
@@ -325,6 +336,10 @@ int main( int argc, char **argv )
     else
         release = true;
 
+    if ( sf::Mouse::isButtonPressed(sf::Mouse::Button::Right) )
+    {
+        myMap.selectBlockUnderMouse(mousePosMap, camera);
+    }
     
 
 /********************************** UPDATE ***********************************/

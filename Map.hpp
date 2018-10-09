@@ -75,7 +75,14 @@ public:
     std::string getName()       { return info.name; }
     std::string getAuthor()     { return info.author; }
 
+    Block *getSelectedBlock() { return selectedBlock; }
+
     bool getReady() { return mapReady; }
+
+    void selectBlockUnderMouse(sf::Vector2f& mousePos, sf::View& camera);
+    void unselect() { selectedBlock = nullptr; }
+
+    void removeBlock(Block *block);
 
 private:
     void clear();
@@ -91,4 +98,5 @@ private:
     bool saved = true;
 
     class Resources *res;
+    Block *selectedBlock = nullptr;
 };
