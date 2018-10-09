@@ -240,6 +240,17 @@ int main( int argc, char **argv )
                 camera.setCenter(camera.getCenter().x, cameraMaxY);
             textTimeInScreen = TextShownTime;
         }
+
+        if ( sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Add))
+        {
+
+        }
+
+        if ( sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Subtract))
+        {
+            
+        }
+        
     }
 
     if( sf::Mouse::isButtonPressed(sf::Mouse::Button::Left))
