@@ -55,6 +55,7 @@ public:
     void setLayerPosition(int position) { layerPosition = position; }
     int  getLayerPosition() { return layerPosition; }
     bool getCanBeSelected() { return canBeSelected; }
+    
 
 protected:
     sf::IntRect  area;

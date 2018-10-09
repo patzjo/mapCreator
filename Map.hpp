@@ -67,13 +67,15 @@ public:
     int getHeight() { return info.height; }
 
     void setWidthandHeight(int width, int height) { info.width = width; info.height = height;}
-    void setFilename(std::string nameOfFile) {filename = nameOfFile + ".map";}
-    void setName(std::string nameOfLevel)    {info.name = nameOfLevel;}
-    void setAuthor(std::string authorName)   {info.author = authorName;}
+    void setFilename(std::string nameOfFile) {filename = nameOfFile + ".map"; saved = false; }
+    void setName(std::string nameOfLevel)    {info.name = nameOfLevel; saved = false; }
+    void setAuthor(std::string authorName)   {info.author = authorName; saved = false; }
 
     std::string getFilename()   { return filename; }
     std::string getName()       { return info.name; }
     std::string getAuthor()     { return info.author; }
+
+    bool getReady() { return mapReady; }
 
 private:
     void clear();
@@ -86,7 +88,7 @@ private:
     int gridSize = defaultGridSize;
     bool mapReady = false;
 
-    bool saved = false;
+    bool saved = true;
 
     class Resources *res;
 };

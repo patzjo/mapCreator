@@ -61,6 +61,17 @@ public:
     void setMap(class Map *mapp) { map = mapp; }
     class Map *getMap() { return map; }
 
+
+    void setBlockAngle(float angle) { if ( blockAngle >= 0.0f && blockAngle < 360.0f) blockAngle = angle; }
+    float getBlockAngle() { return blockAngle; }
+    void changeBlockAngle(float amount) 
+    {
+        if ( blockAngle + amount >= 360.0f )
+            blockAngle = amount - 360.0f; 
+        else
+            blockAngle += amount;
+    }
+
 private:
     std::map <int, sf::Texture *> blockTextures;
     std::vector <sf::Font *> fonts;
@@ -70,4 +81,6 @@ private:
 
     class Console *console;
     class Map *map;
+
+    float blockAngle = 0.0f;
 };

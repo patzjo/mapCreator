@@ -36,11 +36,12 @@ void Console::init(class Resources *res)
     addCommand("help", std::bind(&Console::helpCommand, this, std::placeholders::_1));    
     addCommand("new", std::bind(&Console::newCommand, this, std::placeholders::_1));    
     addCommand("load", std::bind(&Console::loadCommand, this, std::placeholders::_1));    
+    addCommand("setangle", std::bind(&Console::setAngle, this, std::placeholders::_1));    
 }
 
 void Console::updateLogBufferPosition()
 {
-    int position = logBuffer.size() - logLineCount;
+    int position = logBuffer.size() - logLineCount +1;
     if ( position < 0 )
         position = 0;
 
@@ -219,6 +220,7 @@ void Console::helpCommand(std::vector <std::string> args)
     addLogLine("\tCommand\t\tArguments\t\t\t\t\t\tDescription");
     addLogLine("\t   help\t\t-\t\tThis help");
     addLogLine("\t   new\t\t[width] [height]\t\tCreates new map");
+    
 }
 
 void Console::newCommand(std::vector <std::string> args)
@@ -229,7 +231,15 @@ void Console::newCommand(std::vector <std::string> args)
     }
     else
     {
-        addLogLine("\tEnought parameters!");
+        if ( resources->getMap()->isSaved() )
+        {
+            addLogLine("Creating new " + args[1] + "x" + args[2] + " map.");
+            resources->getMap()->createNew("Filename", std::stoi(args[1]), std::stoi(args[2]), "Name", "Author");
+        } else
+        {
+            addLogLine("Map havent been saved, please use (new [width] [height] nosave) to proceed without saving.");
+        }
+
     }
 }
 
@@ -264,6 +274,21 @@ void Console::loadCommand(std::vector <std::string> args)
             
         }
         
+    }
+
+}
+
+void Console::setAngle(std::vector <std::string> args)
+{
+    if ( args.size() != 2)
+    {
+        addLogLine("\tWrong number of arguments. (changeAngle angle)");
+    }
+    else
+    {
+        float newAngle = std::stof(args[1]);
+        addLogLine("Setting block angle to: " + std::to_string(newAngle));
+        resources->setBlockAngle(newAngle);
     }
 
 }

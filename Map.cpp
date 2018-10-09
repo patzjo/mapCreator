@@ -172,7 +172,22 @@ std::vector <Block *> Map::getBlocksOnCamera(sf::View& camera)
 void Map::draw(sf::RenderWindow& window, sf::View& camera)
 {
     if ( !mapReady )
+    {
+        sf::Text text;
+        text.setFont(*res->getFont(0));
+        
+        text.setFillColor(sf::Color::Yellow);
+        text.setCharacterSize(64);
+
+        text.setString("No map loaded!");
+
+        text.setPosition({res->getWindowWidth()/2 - text.getLocalBounds().width/2, 
+                          res->getWindowHeight()/2-text.getLocalBounds().height/2});
+
+        window.draw(text);
+
         return;
+    }
 
     window.setView(camera);
 
@@ -211,7 +226,7 @@ int Map::getGridY(int y)
 
 void Map::addBlock(float blockX, float blockY, float blockAngle, int blockID)
 {
-    if ( blockID == -1 )
+    if ( blockID == -1 || !mapReady )
         return;
     Block *blockPointer = new Block;
     

@@ -27,6 +27,7 @@ public:
     void helpCommand(std::vector <std::string> args);
     void newCommand(std::vector <std::string> args);
     void loadCommand(std::vector <std::string> args);
+    void setAngle(std::vector <std::string> args);
     
     std::vector <std::string>getArgs(std::string);
 

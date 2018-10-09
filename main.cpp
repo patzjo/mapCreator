@@ -16,6 +16,10 @@ const float TextShownTime = 3.0f;
 const float toolAreaHeight = 0.1f;
 const float toolAreaWidth  = 0.9f;
 
+const float blockRotateSpeed = 200.0f;
+const float cameraMoveSpeed = 5000.0f;
+const float zoomSpeed = 10.0f;
+
 const std::string defaultFilename       = "DefaultMapName";
 const std::string defaultAuthor         = "DefaultAuthor";
 const std::string defaultDescription    = "MapTitle";
@@ -74,6 +78,8 @@ int main( int argc, char **argv )
     UI myUI;
     Console myConsole;
     sf::RenderWindow window(sf::VideoMode(screenW, screenH), "Window");
+    window.setFramerateLimit(60.0f);
+   
     sf::View camera;
     sf::Sprite selectedBlockSprite;
     sf::Text text;
@@ -86,7 +92,7 @@ int main( int argc, char **argv )
     myMap.init(&myResources);
     camera.setSize(screenW, screenH);
     camera.setCenter(screenW/2, screenH/2);
-    myMap.createNew("mapFile.map", 10000, 10000, "Map", "TeamGG");
+//    myMap.createNew("mapFile.map", 10000, 10000, "Map", "TeamGG");
 
     myResources.loadBlocks("blocks");
 
@@ -114,7 +120,6 @@ int main( int argc, char **argv )
     text.setFont(*myResources.getFont(0));
     text.setCharacterSize(12);
     float textTimeInScreen = 0.0f;
-
 
     sf::Clock myClock;
     while(window.isOpen())
@@ -204,49 +209,58 @@ int main( int argc, char **argv )
                     myConsole.addInput(event.text.unicode);
                 else
                     myUI.createEvent(myEvent, TEXT_ENTERED_EVENT, (void *)&event.text.unicode);
+            } else if ( event.type == sf::Event::MouseWheelScrolled )
+            {
+                if ( event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel )
+                {
+                    if ( event.mouseWheelScroll.delta > 0)                       
+                        myResources.changeBlockAngle(-blockRotateSpeed * deltaTime);
+                    else
+                        myResources.changeBlockAngle(blockRotateSpeed * deltaTime);
+                }
             }
-            
 
         }
 
 /********************************** MOVEMENT ***********************************/
-    if ( !myUI.isComponentFocused() && !myConsole.isActive() )
+    if ( !myUI.isComponentFocused() && !myConsole.isActive() && myMap.getReady() )
     {
         
 
         if ( sf::Keyboard::isKeyPressed(sf::Keyboard::A))
         {
-            camera.move({-1, 0});
+            camera.move({-cameraMoveSpeed*deltaTime, 0});
             textTimeInScreen = TextShownTime;
         }
         if ( sf::Keyboard::isKeyPressed(sf::Keyboard::D))
         {
-            camera.move({1, 0});
+            camera.move({cameraMoveSpeed*deltaTime, 0});
             textTimeInScreen = TextShownTime;
         }
         if ( sf::Keyboard::isKeyPressed(sf::Keyboard::W))
         {
-            camera.move({0, -1});
+            camera.move({0, -cameraMoveSpeed*deltaTime});
             textTimeInScreen = TextShownTime;
         }
         if ( sf::Keyboard::isKeyPressed(sf::Keyboard::S))
         {
-            camera.move({0, 1});
+            camera.move({0, cameraMoveSpeed*deltaTime});
             textTimeInScreen = TextShownTime;
         }
 
-        float zoomSpeed = 10.0f * deltaTime;
 
         if ( sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Add))
         {
-            camera.setSize({camera.getSize().x * (1.0f - zoomSpeed), 
-                            camera.getSize().y * (1.0f - zoomSpeed)});
+            camera.setSize({camera.getSize().x * (1.0f - zoomSpeed*deltaTime), 
+                            camera.getSize().y * (1.0f - zoomSpeed*deltaTime)});
+            textTimeInScreen = TextShownTime;
         }
 
         if ( sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Subtract))
         {
-            camera.setSize({camera.getSize().x * (1.0f + zoomSpeed), 
-                            camera.getSize().y * (1.0f + zoomSpeed)});
+            camera.setSize({camera.getSize().x * (1.0f + zoomSpeed*deltaTime), 
+                            camera.getSize().y * (1.0f + zoomSpeed*deltaTime)});
+            textTimeInScreen = TextShownTime;
         }
        
         int smallestAspectFactor = (int)getMin(myMap.getWidth()/screenW, myMap.getHeight()/screenH);
@@ -256,11 +270,14 @@ int main( int argc, char **argv )
         int cameraMinY = 0;
         int cameraMaxY = 0;
 
-        if ( camera.getSize().x > myMap.getWidth() || 
-             camera.getSize().y > myMap.getHeight())
+        if ( camera.getSize().x >= (float)smallestAspectFactor*screenW || 
+             camera.getSize().y >= (float)smallestAspectFactor*screenH)
         {
             cameraMinX = myMap.getWidth()/2.0f;
-            cameraMaxX = myMap.getHeight()/2.0f;
+            cameraMaxX = cameraMinX;
+
+            cameraMinY = camera.getSize().y/2.0f;
+            cameraMaxY = cameraMinY;
 
             camera.setSize({(float)smallestAspectFactor*screenW, (float)smallestAspectFactor*screenH});
         }
@@ -294,16 +311,21 @@ int main( int argc, char **argv )
             if ( inRect(mousePos, viewArea) )
             {
                 sf::Vector2f pos = window.mapPixelToCoords(mousePos, camera);
-                myMap.addBlock(pos.x, pos.y, 0.0f, myUI.getSelectedBlock());
-
-                std::cout << "Mouse: " << mousePos.x << "x" << mousePos.y << std::endl;
-                std::cout << "Map: " << pos.x << "x" << pos.y << std::endl;
+                if ( pos.x < myMap.getWidth() && pos.x >= 0.0f && 
+                     pos.y < myMap.getHeight() && pos.y >= 0.0f)
+                {
+                    myMap.addBlock(pos.x, pos.y, myResources.getBlockAngle(), myUI.getSelectedBlock());
+                }
+                else
+                    myConsole.addLogLine("Error: Block out of the map boundaries!");
             }
             release = false;
         }
     }
     else
         release = true;
+
+    
 
 /********************************** UPDATE ***********************************/
 
@@ -325,6 +347,7 @@ int main( int argc, char **argv )
         selectedBlockSprite.setOrigin(selectedBlockSprite.getLocalBounds().width/2.0f, selectedBlockSprite.getLocalBounds().height/2.0f);
         selectedBlockSprite.setColor(sf::Color(255, 255, 255, 128));
         sf::Vector2f pos = window.mapPixelToCoords(mousePos, camera);
+        selectedBlockSprite.setRotation(myResources.getBlockAngle());
         selectedBlockSprite.setPosition(pos);
         window.setView(camera);
         window.draw(selectedBlockSprite);
@@ -343,7 +366,10 @@ int main( int argc, char **argv )
 
         str += "Y: ";
         str += std::to_string((int)(camera.getCenter().y-camera.getSize().y/2.0f)) + " / "; 
-        str += std::to_string((int)(myMap.getHeight()-camera.getSize().y));
+        str += std::to_string((int)(myMap.getHeight()-camera.getSize().y)) + "\n";
+
+        str += "Scale: ";
+        str += std::to_string(camera.getSize().x / (float)screenW);
         
         if ( textTimeInScreen <= 1.0f)
             text.setFillColor(sf::Color(255,255,255, 255*textTimeInScreen));
