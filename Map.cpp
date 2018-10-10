@@ -13,7 +13,6 @@
 namespace fs = std::filesystem;
 
 const int mapID = 0x2150614D;
-const float PI = 3.14159265359f;
 
 Map::~Map()
 {
