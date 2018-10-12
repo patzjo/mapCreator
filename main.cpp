@@ -142,13 +142,14 @@ int main( int argc, char **argv )
         {
             Event myEvent;
 
-            if( event.type == sf::Event::KeyReleased && !myUI.isComponentFocused() && !myConsole.isActive())
+            if( event.type == sf::Event::KeyReleased && !myUI.isComponentFocused() )
             {
                 switch(event.key.code)
                 {
                     case sf::Keyboard::Key::Escape:
                             if ( !myConsole.isActiveOrHiding() )
                                 window.close();
+                            
                     break;
 
                     case sf::Keyboard::Key::F1:
@@ -181,8 +182,6 @@ int main( int argc, char **argv )
 
                     case sf::Keyboard::Key::Enter:
                     {
-                        if ( !myConsole.isActive() )
-                            myConsole.show();
                     }
                     break;
 
@@ -191,10 +190,19 @@ int main( int argc, char **argv )
                         if ( myMap.getSelectedBlock() != nullptr )
                         {
                             myMap.removeBlock(myMap.getSelectedBlock());
-                            myMap.unselect();
                         }
                     }
                     break;
+
+                    case sf::Keyboard::Key::Tab:
+                    {
+                        if ( !myConsole.isActive() )
+                            myConsole.show();
+                        else
+                            myConsole.hide();
+                    }
+                    break;
+
                     default: break;
                 }
             } 
@@ -355,7 +363,7 @@ int main( int argc, char **argv )
 
     myUI.draw(&myResources, window);
     
-/********************* DRAW SELECTED BLOCK AT MOUSE POSITION *****************/
+/***************** DRAW SELECTED BLOCK AT THE MOUSE POSITION *****************/
     if ( inRect(mousePos, viewArea) )
     {
 
@@ -369,7 +377,7 @@ int main( int argc, char **argv )
         window.setView(window.getDefaultView());
     }
 
-/************************** DRAW CAMERA POSITION TEXT ************************/
+/*********************** DRAW THE POSITION OF CAMERA TEXT ********************/
     if ( textTimeInScreen > 0.0f )
     {
         std::string str;

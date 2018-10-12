@@ -287,6 +287,9 @@ void Map::removeBlock(Block *block)
         return;
 
 
+    if ( block == getSelectedBlock())
+        unselect();
+
     for ( auto it = blocks.begin(); it != blocks.end(); it++ )
     {
         if ( *it == block )
