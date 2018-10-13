@@ -282,20 +282,20 @@ int main( int argc, char **argv )
             textTimeInScreen = TextShownTime;
         }
        
-        int smallestAspectFactor = (int)getMin(myMap.getWidth()/screenW, myMap.getHeight()/screenH);
+        int smallestAspectFactor = (int)getMin(myMap.getWidth()/screenW, myMap.getHeight()/screenH) -1.0f;
         
         int cameraMinX = 0; 
         int cameraMaxX = 0;
         int cameraMinY = 0;
         int cameraMaxY = 0;
 
-        if ( camera.getSize().x >= (float)smallestAspectFactor*screenW || 
-             camera.getSize().y >= (float)smallestAspectFactor*screenH)
+        if ( camera.getSize().x > (float)smallestAspectFactor*screenW || 
+             camera.getSize().y > (float)smallestAspectFactor*screenH)
         {
-            cameraMinX = myMap.getWidth()/2.0f;
+            cameraMinX = myMap.getWidth() / 2.0f;
             cameraMaxX = cameraMinX;
 
-            cameraMinY = camera.getSize().y/2.0f;
+            cameraMinY = myMap.getHeight() / 2.0f;
             cameraMaxY = cameraMinY;
 
             camera.setSize({(float)smallestAspectFactor*screenW, (float)smallestAspectFactor*screenH});
