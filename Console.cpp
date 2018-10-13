@@ -2,11 +2,20 @@
 #include "Resources.hpp"
 #include <functional>
 #include <algorithm>
-#include <filesystem>
+#include <sstream>
+#include <cctype>
 
 #include "Map.hpp"
 
+#ifdef linux
+#include <filesystem>
 namespace fs = std::filesystem;
+#endif
+
+#if defined(_WIN32) || defined(_WIN64)
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#endif
 
 
 void Console::init(class Resources *res)

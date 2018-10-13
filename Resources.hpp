@@ -1,11 +1,18 @@
 #pragma once
 #include <SFML/Graphics.hpp>
 #include <iostream>
-#include <filesystem>
 #include <string>
 #include <cstring>
 
+#ifdef linux
+#include <filesystem>
 namespace fs = std::filesystem;
+#endif
+
+#if defined(_WIN32) || defined(_WIN64)
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#endif
 
 struct TextureData
 {
